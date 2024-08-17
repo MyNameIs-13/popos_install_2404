@@ -27,8 +27,10 @@ Dotfiles handling and user envirnment configuration is part of the dotfiles repo
 > [!NOTE]
 >
 > the script initiates a reboot. After the reboot password entering is required.
+
+> [!NOTE]
 >
->
+> using 'vm' in the hostname implies that the installation happens on a virtual machine. No disk encryption is implied. common vm tools are installed.
 
 - there are two paths. Either with `git clone` or having the project on the usb drive and copying from there
 - open terminal and execute

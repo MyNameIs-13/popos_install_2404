@@ -133,6 +133,17 @@
   become: True
   tags: home
 
+- name: install virtual machine tools
+  ansible.builtin.apt:
+    state: present
+    pkg:
+      - open-vm-tools
+      - open-vm-tools-desktop
+      - spice-vdagent
+      - spice-webdavd
+  become: True
+  tags: vm
+
 - name: add syncthing repo and install
   block:
     - name: get syncthing key, save in /usr/share/keyrings for newer apt deb syntax

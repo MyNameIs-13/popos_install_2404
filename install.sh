@@ -103,6 +103,9 @@ else
         sudo rm -r "/${REPO_NAME}"
 
         tags="common,home"
+        if [[ "${HOST_NAME}" == *"vm"* ]]; then
+            tags+=",vm"
+        fi
         if command -v dmidecode &> /dev/null; then
             chassis_type=$(sudo dmidecode -s chassis-type)
             case "${chassis_type}" in
