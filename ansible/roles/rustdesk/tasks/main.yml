@@ -31,9 +31,8 @@
   tags: common
 
 - name: install rustdesk
-  ansible.builtin.get_url:
-    ansible.builtin.apt:
-      deb: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ rustdesk_latest_version }}/rustdesk-{{ rustdesk_latest_version }}-x86_64.deb
-    become: True
-    tags: common
+  ansible.builtin.apt:
+    deb: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ rustdesk_latest_version }}/rustdesk-{{ rustdesk_latest_version }}-x86_64.deb
+  become: True
+  tags: common
   when: rustdesk_installed_version != rustdesk_latest_version
