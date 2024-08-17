@@ -1,0 +1,106 @@
+---
+- name: install required packages
+  ansible.builtin.apt:
+    name: 
+    - git
+    - libbenchmark1.8.3
+    - libdisplay-info1
+    - libevdev-dev
+    - libgav1-1
+    - libgudev-1.0-dev
+    - libmtdev-dev
+    - libseat1
+    - libstb0
+    - libwacom-dev
+    - libxcb-ewmh2
+    - libxcb-shape0-dev
+    - libxcb-xfixes0-dev
+    - libxmu-headers
+    - libyuv0
+    - libx11-xcb-dev
+    - libxres-dev
+    - libxmu-dev
+    - libseat-dev
+    - libinput-dev
+    - libxcb-composite0-dev
+    - libxcb-ewmh-dev
+    - libxcb-icccm4-dev
+    - libxcb-res0-dev
+    - libcap-dev
+    - wayland-protocols
+    - libvulkan-dev
+    - libwayland-dev
+    - libx11-dev
+    - cmake
+    - pkg-config
+    - meson
+    - libxdamage-dev
+    - libxcomposite-dev
+    - libxcursor-dev
+    - libxxf86vm-dev
+    - libxtst-dev
+    - libxkbcommon-dev
+    - libdrm-dev
+    - libpixman-1-dev
+    - libdecor-0-dev
+    - glslang-tools
+    - libbenchmark-dev
+    - libsdl2-dev
+    - libglm-dev
+    - libeis-dev
+    - libavif-dev
+    - hwdata
+    state: present
+  become: true
+  tags: home
+
+- name: clone the gamescope repository
+  ansible.builtin.git:
+    repo: https://github.com/ValveSoftware/gamescope.git
+    dest: /opt/gamescope
+    single_branch: true
+    version: "3.14.24"
+  register: gamescope_git_status
+  ignore_errors: true
+  become: true
+  tags: home
+
+- name: when git repo changed
+  block:
+    - name: check if '/opt' is already in git safe.directory
+      ansible.builtin.command: "git config --global --get-all safe.directory"
+      register: gamescope_git_safe_directory
+      ignore_errors: yes  # If there are no safe.directory entries, this will avoid failing the playbook.
+
+    - name: add '/opt' to git safe.directory if not present
+      ansible.builtin.command: "git config --global --add safe.directory '/opt'"
+      when: "'/opt' not in gamescope_git_safe_directory.stdout_lines"
+   
+    - name: remove old builds and build attempts
+      ansible.builtin.file:
+        state: absent
+        dest: /opt/gamescope/build
+
+    - name: run meson to configure the build directory
+      ansible.builtin.command: meson setup build/
+      args:
+        chdir: /opt/gamescope
+
+    - name: compile the project with ninja
+      ansible.builtin.command: ninja -C build/
+      args:
+        chdir: /opt/gamescope
+
+    - name: install the compiled project
+      ansible.builtin.command: meson install -C build/ --skip-subprojects
+      args:
+        chdir: /opt/gamescope
+
+    # removed due to: https://github.com/ValveSoftware/gamescope/issues/107
+    # - name: setcap
+    #   ansible.builtin.command: setcap 'CAP_SYS_NICE=eip' /usr/local/bin/gamescope
+    #   args:
+    #     chdir: /opt/gamescope        
+  tags: home
+  become: true
+  when: gamescope_git_status.changed

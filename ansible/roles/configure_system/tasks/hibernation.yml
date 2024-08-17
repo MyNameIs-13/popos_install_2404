@@ -1,0 +1,126 @@
+---
+
+- name: ensure HibernateDelaySec is set in sleep.conf
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/sleep.conf
+    line: "HibernateDelaySec=900"
+    create: yes
+  tags: common
+  become: true
+
+- name: ensure AllowSuspendThenHibernate is set in sleep.conf
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/sleep.conf
+    line: "AllowSuspendThenHibernate=yes"
+    create: yes
+  tags: common
+  become: true
+
+- name: ensure HandleLidSwitch is set in logind.conf
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/logind.conf
+    line: "HandleLidSwitch=hibernate"
+    create: yes
+  tags: laptop
+  become: true
+
+- name: ensure HandleSuspendKey is set in logind.conf
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/logind.conf
+    line: "HandleSuspendKey=suspend-then-hibernate"
+    create: yes
+  tags: common
+  become: true
+
+- name: create /etc/polkit-1/localauthority/10-vendor.d directory if it does not exist
+  file:
+    path: /etc/polkit-1/localauthority/10-vendor.d
+    state: directory
+  become: True    
+  tags: common  
+
+# TODO: doesn't seem to work in cosmic
+- name: create com.ubuntu.pkla (adds hibernate option to logout menu)
+  ansible.builtin.copy:
+    dest: /etc/polkit-1/localauthority/10-vendor.d/com.ubuntu.pkla
+    content: |
+      [Enable hibernate in upower]
+      Identity=unix-user:*
+      Action=org.freedesktop.upower.hibernate
+      ResultActive=yes
+
+      [Enable hibernate in logind]
+      Identity=unix-user:*
+      Action=org.freedesktop.login1.hibernate;org.freedesktop.login1.handle-hibernate-key;org.freedesktop.login1;org.freedesktop.login1.hibernate-multiple-sessions;org.freedesktop.login1.hibernate-ignore-inhibit
+      ResultActive=yes
+  become: True    
+  tags: common  
+
+- name: ensure the user can suspend without password
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/sleepstates
+    line: "{{ ansible_user }} ALL=NOPASSWD: /bin/systemctl suspend"
+    create: yes
+    mode: '0440'
+  tags: common
+  become: true
+  
+- name: ensure the user can hibernate without password
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/sleepstates
+    line: "{{ ansible_user }} ALL=NOPASSWD: /bin/systemctl hibernate"
+    create: yes
+    mode: '0440'
+  tags: common
+  become: true
+
+- name: ensure the user can suspend-then-hibernate without password
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/sleepstates
+    line: "{{ ansible_user }} ALL=NOPASSWD: /bin/systemctl suspend-then-hibernate"
+    create: yes
+    mode: '0440'
+  tags: common
+  become: true 
+
+- name: dconf requirement installation
+  ansible.builtin.apt:
+    state: present
+    name: python3-psutil
+  tags: laptop
+  become: true
+
+- name: configure power-button-action
+  ansible.builtin.dconf:
+    key: "/org/gnome/settings-daemon/plugins/power/power-button-action"
+    value: "'hibernate'"
+    state: present
+  tags: laptop
+
+- name: configure sleep-inactive-ac-type
+  ansible.builtin.dconf:
+    key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type"
+    value: "'suspend'"
+    state: present
+  tags: laptop
+
+- name: configure sleep-inactive-ac-timeout
+  ansible.builtin.dconf:
+    key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-timeout"
+    value: 7200
+    state: present
+  tags: laptop
+
+- name: configure sleep-inactive-battery-type
+  ansible.builtin.dconf:
+    key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type"
+    value: "'suspend-then-hibernate'"
+    state: present
+  tags: laptop
+
+- name: configure sleep-inactive-battery-timeout
+  ansible.builtin.dconf:
+    key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-timeout"
+    value: 900
+    state: present
+  tags: laptop

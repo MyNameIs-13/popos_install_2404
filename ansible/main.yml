@@ -1,0 +1,10 @@
+---
+- hosts: all
+  roles:
+    - configure_system
+    - apt
+    - ohmyposh
+    - joplin
+    - zed-editor
+    - pycharm
+    - gamescope

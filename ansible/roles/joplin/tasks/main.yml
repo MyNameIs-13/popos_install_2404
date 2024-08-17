@@ -1,0 +1,91 @@
+---
+# based on : https://github.com/thisdwhitley/ansible-role-joplin/
+- name: scrape URL for latest version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
+    return_content: true
+  register: joplin_latest
+  tags: home
+
+- name: split version out
+  ansible.builtin.set_fact:
+    joplin_latest_version: "{{ joplin_latest.json.tag_name | regex_replace('v') }}"
+  tags: home
+
+- name: check if /opt/joplin/VERSION exists
+  ansible.builtin.stat:
+    path: /opt/joplin/VERSION
+  register: joplin_VERSION_file
+  become: true
+  tags: home
+
+- name: set installed_version based on file existence
+  ansible.builtin.set_fact:
+    joplin_installed_version: "{{ lookup('file', '/opt/joplin/VERSION') }}"
+  when: joplin_VERSION_file.stat.exists
+  tags: home
+
+- name: set installed_version to 'not installed' if file does not exist
+  ansible.builtin.set_fact:
+    joplin_installed_version: "not installed"
+  when: not joplin_VERSION_file.stat.exists
+  tags: home
+
+- name: display the joplin version
+  ansible.builtin.debug:
+    msg: 
+      - "installed: {{ joplin_installed_version }}"
+      - "available: {{ joplin_latest_version }}"
+  tags: home
+
+- name: when there is no VERSION or it's contents don't match, do these
+  block:
+    - name: delete previous version
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: absent
+      with_items:
+        - /usr/local/bin/Joplin.AppImage
+        - /usr/share/applications/joplin.desktop
+        - /opt/joplin/VERSION
+
+    - name: download the latest appimage version
+      ansible.builtin.get_url:
+        url: https://github.com/{{ user }}/{{ repo }}/releases/download/v{{ joplin_latest_version }}/Joplin-{{ joplin_latest_version }}.AppImage
+        dest: /usr/local/bin/Joplin.AppImage
+        mode: '0755'
+
+    - name: creates the folder where VERSION and icon will be stored
+      ansible.builtin.file:
+        path: /opt/joplin
+        state: directory
+
+    - name: download the icon
+      ansible.builtin.get_url:
+        url: https://joplinapp.org/images/Icon512.png
+        dest: /opt/joplin/Icon512.png
+      
+    - name: add VERSION file
+      ansible.builtin.copy:
+        content: "{{ joplin_latest_version }}"
+        dest: /opt/joplin/VERSION      
+
+    - name: create desktop file
+      ansible.builtin.copy:
+        dest: /usr/share/applications/joplin.desktop
+        content: |
+          [Desktop Entry]
+          Encoding=UTF-8
+          Name=Joplin
+          Comment=Joplin for Desktop
+          Exec=/usr/local/bin/Joplin.AppImage %u
+          Icon=/usr/local/share/joplin/Icon512.png
+          StartupWMClass=Joplin
+          Type=Application
+          Categories=Office;
+          MimeType=x-scheme-handler/joplin;
+          X-GNOME-SingleWindow=true
+          SingleMainWindow=true
+  become: true
+  tags: home
+  when: joplin_installed_version != joplin_latest_version

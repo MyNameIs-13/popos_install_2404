@@ -1,0 +1,92 @@
+---
+
+- name: create battery.target systemd unit file
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/battery.target
+    content: |
+      [Unit]
+      Description=On battery power
+      DefaultDependencies=no
+      StopWhenUnneeded=yes
+    mode: '0644'
+  become: True    
+  tags: laptop
+  
+- name: add power profile battery service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/powerprofile_battery.service
+    content: |
+      [Unit]
+      Description=Laptop battery savings
+
+      [Service]
+      Type=oneshot
+      ExecStartPre=/bin/sleep 15
+      ExecStart=/usr/bin/system76-power profile battery
+
+      [Install]
+      WantedBy=battery.target
+    mode: '0644'
+  become: True    
+  tags: laptop
+  
+- name: create ac.target systemd unit file
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/ac.target
+    content: |
+      [Unit]
+      Description=On AC power
+      DefaultDependencies=no
+      StopWhenUnneeded=yes
+    mode: '0644'
+  become: True    
+  tags: laptop
+  
+- name: add power profile balanced service
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/powerprofile_balanced.service
+    content: |
+      [Unit]
+      Description=disable Laptop battery savings
+
+      [Service]
+      Type=oneshot
+      ExecStartPre=/bin/sleep 15
+      ExecStart=/usr/bin/system76-power profile balanced
+
+      [Install]
+      WantedBy=ac.target
+    mode: '0644'
+  become: True    
+  tags: laptop
+  
+- name: add udev rules for power targets
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/99-powertargets.rules
+    content: |
+      SUBSYSTEM=="power_supply", ATTR{online}=="0", RUN+="/usr/bin/systemctl start battery.target"
+      SUBSYSTEM=="power_supply", ATTR{online}=="1", RUN+="/usr/bin/systemctl start ac.target"
+    mode: '0644'
+  become: True    
+  tags: laptop
+  
+- name: reload systemd daemon to recognize new services
+  command: systemctl daemon-reload
+  become: True    
+  tags: laptop
+  
+- name: enable powerprofile_battery service
+  systemd:
+    name: powerprofile_battery.service
+    enabled: true
+    masked: no
+  become: True    
+  tags: laptop
+
+- name: enable powerprofile_balanced service
+  systemd:
+    name: powerprofile_balanced.service
+    enabled: true
+    masked: no
+  become: True    
+  tags: laptop

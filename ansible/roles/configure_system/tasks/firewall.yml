@@ -1,0 +1,50 @@
+---
+
+- name: enable UFW
+  community.general.ufw:
+    state: enabled
+  tags: common
+  become: true
+
+# ufw supports connection rate limiting, which is useful for protecting
+# against brute-force login attacks. ufw will deny connections if an IP
+# address has attempted to initiate 6 or more connections in the last
+# 30 seconds. See  http://www.debian-administration.org/articles/187
+# for details. Typical usage is:
+- name: limit ssh
+  community.general.ufw:
+    rule: limit
+    port: ssh
+    proto: tcp
+  tags: common
+  become: true
+
+- name: allow port range 1714:1764 (kde connect)
+  community.general.ufw:
+    rule: allow
+    port: 1714:1764
+    proto: "{{ item }}"
+  with_items:
+    - tcp
+    - udp
+  tags: home
+  become: true
+
+- name: allow port range 21027 (syncthing)
+  community.general.ufw:
+    rule: allow
+    port: '21027'
+    proto: udp
+  tags: home
+  become: true
+      
+- name: allow port range 22000 (syncthing)
+  community.general.ufw:
+    rule: allow
+    port: '22000'
+    proto: "{{ item }}"
+  with_items:
+    - tcp
+    - udp
+  tags: home
+  become: true

@@ -1,0 +1,22 @@
+---
+
+- name: set timezone to Europe/Brussels
+  timezone:
+    name: Europe/Brussels
+  tags: common
+
+- name: configure firewall rules
+  ansible.builtin.include_tasks:
+    file: firewall.yml
+  tags: common
+
+- name: configure hibernation
+  ansible.builtin.include_tasks:
+    file: hibernation.yml
+  tags: common
+
+- name: configure automatic switch batterty and ac profile
+  ansible.builtin.include_tasks:
+    file: autopowerprofile.yml
+  tags: laptop 
+  

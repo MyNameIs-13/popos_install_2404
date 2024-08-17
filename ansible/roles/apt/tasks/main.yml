@@ -1,0 +1,213 @@
+---
+- name: run the equivalent of "apt-get update"
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: true
+  tags: common
+
+- name: add brave repo and install
+  block:
+    - name: get brave key, save in /usr/share/keyrings for newer apt deb syntax
+      ansible.builtin.get_url:
+        url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+        dest: /usr/share/keyrings/brave-browser-archive-keyring.gpg
+        mode: "0666"
+
+    - name: add brave apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"
+        state: present
+        filename: brave-browser-release
+        update_cache: yes
+        mode: "0644"
+        validate_certs: yes
+
+    - name: install brave browser
+      ansible.builtin.apt:
+        state: present
+        name: brave-browser
+      ignore_errors: true # --check cannot validate that the package is available as the repo is not yet added
+  become: True
+  tags: common
+
+- name: install vesktop.deb package
+  ansible.builtin.apt:
+    deb: https://vencord.dev/download/vesktop/amd64/deb
+  become: True
+  tags: common
+
+- name: remove a list of packages
+  ansible.builtin.apt:
+    state: absent
+    pkg:
+      - firefox
+      - totem
+  become: True
+  tags: common
+
+- name: install common command line tools and libs
+  ansible.builtin.apt:
+    state: present
+    pkg:
+      - ansible
+      - lm-sensors
+      - keyutils
+      - fprintd
+      - libpam-fprintd
+      - nala
+      - tar
+      - wget
+      - jq
+      - curl
+      - git
+      - unzip
+      - vim
+      - gnupg
+      - lsb-release
+      - apt-transport-https
+      - ca-certificates
+      - python3-pip
+      - python3-github
+      - python3-venv
+      - python3-psutil
+      - libsdl2-2.0-0
+      - libsdl2-image-2.0-0
+      - libsecret-tools
+      - software-properties-common
+      - mediainfo
+      - v4l2loopback-dkms
+      - plocate
+      - gir1.2-gst-plugins-base-1.0
+      - golang-go
+      - libxkbcommon-dev
+      - p7zip
+      - texlive-base
+      - texlive-binaries
+      - texlive-extra-utils
+      - texlive-fonts-recommended
+      - texlive-lang-german
+      - texlive-lang-greek
+      - texlive-latex-base
+      - texlive-latex-extra
+      - texlive-latex-recommended
+      - texlive-luatex
+      - texlive-pictures
+      - texlive-plain-generic
+      - texlive-science
+      - texlive-xetex
+  become: True
+  tags: common
+
+- name: install common gui applications
+  ansible.builtin.apt:
+    state: present
+    pkg:
+      - celluloid
+      - obs-studio
+      - kdenlive
+      - rpi-imager
+      - pavucontrol
+      - code
+      - keepassxc
+      - virt-manager
+      - gimp
+      - texstudio
+  become: True
+  tags: common
+
+- name: install home specific command line tools and libs
+  ansible.builtin.apt:
+    state: present
+    pkg:
+      - gamemode
+  become: True
+  tags: home
+
+- name: install home specific gui applications
+  ansible.builtin.apt:
+    state: present
+    pkg:
+      - lutris
+      - steam
+  become: True
+  tags: home
+
+- name: add syncthing repo and install
+  block:
+    - name: get syncthing key, save in /usr/share/keyrings for newer apt deb syntax
+      ansible.builtin.get_url:
+        url: https://syncthing.net/release-key.gpg
+        dest: /usr/share/keyrings/syncthing-archive-keyring.gpg
+        mode: "0666"
+
+    - name: add syncthing apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable"
+        state: present
+        filename: syncthing
+        update_cache: yes
+        mode: "0644"
+        validate_certs: yes
+
+    - name: install syncthing
+      ansible.builtin.apt:
+        state: present
+        name: syncthing
+      ignore_errors: true # --check cannot validate that the package is available as the repo is not yet added
+  become: True
+  tags: home
+
+- name: add element repo and install
+  block:
+    - name: get element key, save in /usr/share/keyrings for newer apt deb syntax
+      ansible.builtin.get_url:
+        url: https://packages.element.io/debian/element-io-archive-keyring.gpg
+        dest: /usr/share/keyrings/element-io-archive-keyring.gpg
+        mode: "0666"
+
+    - name: add element apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/element-io-archive-keyring.gpg] https://packages.element.io/debian/ default main"
+        state: present
+        filename: element-io
+        update_cache: yes
+        mode: "0644"
+        validate_certs: yes
+
+    - name: install element
+      ansible.builtin.apt:
+        state: present
+        name: element-desktop
+      ignore_errors: true # --check cannot validate that the package is available as the repo is not yet added
+  become: True
+  tags: home
+
+- name: install desktop specific gui applications
+  ansible.builtin.apt:
+    state: present
+    pkg:
+      - conky
+      - nextcloud-desktop
+  become: True
+  tags: desktop
+
+- name: update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+  become: True
+  tags: common
+
+- name: remove dependencies that are no longer required and purge their configuration files
+  ansible.builtin.apt:
+    autoremove: yes
+    purge: true
+  become: True
+  tags: common
+
+- name: run the equivalent of "apt-get clean"
+  ansible.builtin.apt:
+    clean: yes
+  become: True
+  tags: common
