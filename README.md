@@ -1,7 +1,5 @@
 # Pop!_OS 24.04 install
 
-
-
 personal install and configuration script for Pop!_OS 24.04.
 It will install Pop!_OS from the live usb environment and then restart to configure the system with [ansible](https://www.ansible.com/) and the user environment with [chezmoi](https://www.chezmoi.io/).
 this repo only handles the installation and system configuration (with ansible).

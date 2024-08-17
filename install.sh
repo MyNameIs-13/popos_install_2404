@@ -66,11 +66,6 @@ else
     echo "${BOLD}Welcome back to the custom GSK installer!${NORMAL}"
     echo -e "\n__________________________________________________________\n"
     HOST_NAME="${HOSTNAME}"
-    if [[ "${HOST_NAME}" != *"vm"* ]]; then
-        MACHINES_PATH="${SCRIPT_HOME}/machines"
-    else
-        MACHINES_PATH="${SCRIPT_HOME}/machines/virtual-machines"
-    fi
     USER_NAME="${USER}"
 
     if [[ "${CONTINUE_SCRIPT}" -eq 1 ]]; then
