@@ -121,7 +121,7 @@ else
             esac
         fi
         inventory="${GIT_PATH}/ansible/localhost"
-        sudo ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -t "${tags}" -e ansible_user=${USER}
+        sudo ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -t "${tags}" -e hibernation_user=${USER}
 
         # FIXME initialize dotfiles repo as soon as it exists
         # sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply $GITHsUB_USERNAME
