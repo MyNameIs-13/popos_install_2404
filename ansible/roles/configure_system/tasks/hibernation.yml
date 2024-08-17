@@ -1,5 +1,4 @@
 ---
-
 - name: ensure HibernateDelaySec is set in sleep.conf
   ansible.builtin.lineinfile:
     path: /etc/systemd/sleep.conf
@@ -36,8 +35,8 @@
   file:
     path: /etc/polkit-1/localauthority/10-vendor.d
     state: directory
-  become: True    
-  tags: common  
+  become: True
+  tags: common
 
 # TODO: doesn't seem to work in cosmic
 - name: create com.ubuntu.pkla (adds hibernate option to logout menu)
@@ -53,24 +52,24 @@
       Identity=unix-user:*
       Action=org.freedesktop.login1.hibernate;org.freedesktop.login1.handle-hibernate-key;org.freedesktop.login1;org.freedesktop.login1.hibernate-multiple-sessions;org.freedesktop.login1.hibernate-ignore-inhibit
       ResultActive=yes
-  become: True    
-  tags: common  
+  become: True
+  tags: common
 
 - name: ensure the user can suspend without password
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/sleepstates
     line: "{{ ansible_user }} ALL=NOPASSWD: /bin/systemctl suspend"
     create: yes
-    mode: '0440'
+    mode: "0440"
   tags: common
   become: true
-  
+
 - name: ensure the user can hibernate without password
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/sleepstates
     line: "{{ ansible_user }} ALL=NOPASSWD: /bin/systemctl hibernate"
     create: yes
-    mode: '0440'
+    mode: "0440"
   tags: common
   become: true
 
@@ -79,9 +78,9 @@
     path: /etc/sudoers.d/sleepstates
     line: "{{ ansible_user }} ALL=NOPASSWD: /bin/systemctl suspend-then-hibernate"
     create: yes
-    mode: '0440'
+    mode: "0440"
   tags: common
-  become: true 
+  become: true
 
 - name: dconf requirement installation
   ansible.builtin.apt:
@@ -90,6 +89,7 @@
   tags: laptop
   become: true
 
+# FIXME: doesn't seem to work (probably does not exist in COSMIC)
 - name: configure power-button-action
   ansible.builtin.dconf:
     key: "/org/gnome/settings-daemon/plugins/power/power-button-action"
