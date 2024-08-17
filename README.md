@@ -18,13 +18,13 @@ Dotfiles handling and user envirnment configuration is part of the dotfiles repo
 
 ## Install
 
-> [!WARNING]
+> [!CAUTION]
 >
 > - the script will format the selected drive
 > - this means the drive will be wiped.
 > - be warned. I have spoken.
 
-> [!INFO]
+> [!NOTE]
 >
 > the script initiates a reboot. After the reboot password entering is required.
 >
