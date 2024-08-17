@@ -16,4 +16,5 @@
     # - zed-editor
     # - rustdesk
     # - pycharm
-    # - gamescope
+    - role: gamescope
+      when: ansible_distribution_version == "24.04"
