@@ -1,0 +1,39 @@
+---
+- name: scrape URL for latest version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
+    return_content: true
+  register: rustdesk_latest
+  tags: common
+
+- name: split version out
+  ansible.builtin.set_fact:
+    rustdesk_latest_version: "{{ rustdesk_latest.json.tag_name }}"
+  tags: common
+
+- name: check installed rustdesk version
+  ansible.builtin.command: /usr/bin/rustdesk --version
+  register: rustdesk_installed_version_output
+  ignore_errors: true
+  tags: common
+
+- name: save installed rustdesk version as a fact
+  ansible.builtin.set_fact:
+    rustdesk_installed_version: "{{ rustdesk_installed_version_output.stdout if rustdesk_installed_version_output.rc == 0 else 'not installed' }}"
+  when: rustdesk_installed_version_output is defined
+  tags: common
+
+- name: display the rustdesk version
+  ansible.builtin.debug:
+    msg:
+      - "installed: {{ rustdesk_installed_version }}"
+      - "available: {{ rustdesk_latest_version }}"
+  tags: common
+
+- name: install rustdesk
+  ansible.builtin.get_url:
+    ansible.builtin.apt:
+      deb: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ rustdesk_latest_version }}/rustdesk-{{ rustdesk_latest_version }}-x86_64.deb
+    become: True
+    tags: common
+  when: rustdesk_installed_version != rustdesk_latest_version

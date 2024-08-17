@@ -1,12 +1,13 @@
 ---
 # enable only the role which should be testes/debugged
 - hosts: all
-  
+
   roles:
     # - configure_system
     # - apt
     # - ohmyposh
     # - joplin
-    - zed-editor
+    # - zed-editor
+    - rustdesk
     # - pycharm
     # - gamescope
