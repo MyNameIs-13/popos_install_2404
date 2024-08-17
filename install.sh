@@ -97,7 +97,7 @@ else
         autostart_file "${AUTOSTART_FILE}"
         sudo rm -r "/${REPO_NAME}"
 
-        tags="common,home"
+        tags="home"
         if [[ "${HOST_NAME}" == *"vm"* ]]; then
             tags+=",vm"
         fi

@@ -4,39 +4,39 @@
     path: /etc/systemd/sleep.conf
     line: "HibernateDelaySec=900"
     create: yes
-  tags: common
   become: true
+  tags: always
 
 - name: ensure AllowSuspendThenHibernate is set in sleep.conf
   ansible.builtin.lineinfile:
     path: /etc/systemd/sleep.conf
     line: "AllowSuspendThenHibernate=yes"
     create: yes
-  tags: common
   become: true
+  tags: always
 
 - name: ensure HandleLidSwitch is set in logind.conf
   ansible.builtin.lineinfile:
     path: /etc/systemd/logind.conf
     line: "HandleLidSwitch=hibernate"
     create: yes
-  tags: laptop
   become: true
+  tags: laptop
 
 - name: ensure HandleSuspendKey is set in logind.conf
   ansible.builtin.lineinfile:
     path: /etc/systemd/logind.conf
     line: "HandleSuspendKey=suspend-then-hibernate"
     create: yes
-  tags: common
   become: true
+  tags: always
 
 - name: create /etc/polkit-1/localauthority/10-vendor.d directory if it does not exist
   file:
     path: /etc/polkit-1/localauthority/10-vendor.d
     state: directory
   become: True
-  tags: common
+  tags: always
 
 # TODO: doesn't seem to work in cosmic
 - name: create com.ubuntu.pkla (adds hibernate option to logout menu)
@@ -53,7 +53,7 @@
       Action=org.freedesktop.login1.hibernate;org.freedesktop.login1.handle-hibernate-key;org.freedesktop.login1;org.freedesktop.login1.hibernate-multiple-sessions;org.freedesktop.login1.hibernate-ignore-inhibit
       ResultActive=yes
   become: True
-  tags: common
+  tags: always
 
 - name: ensure the user can suspend without password
   ansible.builtin.lineinfile:
@@ -61,8 +61,8 @@
     line: "{{ hibernation_user }} ALL=NOPASSWD: /bin/systemctl suspend"
     create: yes
     mode: "0440"
-  tags: common
   become: true
+  tags: always
 
 - name: ensure the user can hibernate without password
   ansible.builtin.lineinfile:
@@ -70,8 +70,8 @@
     line: "{{ hibernation_user }} ALL=NOPASSWD: /bin/systemctl hibernate"
     create: yes
     mode: "0440"
-  tags: common
   become: true
+  tags: always
 
 - name: ensure the user can suspend-then-hibernate without password
   ansible.builtin.lineinfile:
@@ -79,15 +79,15 @@
     line: "{{ hibernation_user }} ALL=NOPASSWD: /bin/systemctl suspend-then-hibernate"
     create: yes
     mode: "0440"
-  tags: common
   become: true
+  tags: always
 
 - name: dconf requirement installation
   ansible.builtin.apt:
     state: present
     name: python3-psutil
-  tags: laptop
   become: true
+  tags: laptop
 
 # FIXME: doesn't seem to work (probably does not exist in COSMIC)
 - name: configure power-button-action

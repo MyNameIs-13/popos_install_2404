@@ -8,13 +8,20 @@
       debug: msg="{{ ansible_distribution_version}}"
     # - name: Distribution major version
     #   debug: msg="{{ ansible_distribution_major_version }}"
+    - name: check the current day
+      ansible.builtin.shell: "echo $(($(date '+%d')%7))"
+      register: current_day
+      tags: always
+    - debug: msg="{{ current_day.stdout }}"
+      tags: always
+      when: (current_day.stdout | int == 1) and (ansible_distribution_version == "22.04")
   roles:
-    # - configure_system
-    # - apt
-    # - ohmyposh
-    # - joplin
-    # - zed-editor
-    # - rustdesk
-    # - pycharm
-    - role: gamescope
-      when: ansible_distribution_version == "24.04"
+    # - role: configure_system
+    # - role: apt
+    # - role: ohmyposh
+    # - role: joplin
+    # - role: zed-editor
+    # - role: rustdesk
+    # - role: pycharm
+    # - role: gamescope
+    #   when: ansible_distribution_version == "24.04"

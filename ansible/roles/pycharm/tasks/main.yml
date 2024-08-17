@@ -6,44 +6,47 @@
     validate_certs: false
   register: pycharm_latest
   until: pycharm_latest.status == 200
-  retries: 5 
+  retries: 5
   delay: 5 # Every 5 seconds
-  tags: common
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags: always
 
 - name: split version out
   ansible.builtin.set_fact:
     pycharm_latest_version: "{{ pycharm_latest.json.PCC.0.version }}"
-  tags: common
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags: always
 
 - name: find the pycharm directory with version number
   ansible.builtin.find:
     paths: /opt/
-    patterns: 'pycharm-community-*'
+    patterns: "pycharm-community-*"
     file_type: directory
   register: pycharm_found_directories
-  tags: common
+  tags: always
 
 - name: extract path and version number
   ansible.builtin.set_fact:
     pycharm_path: "{{ item.path }}"
     pycharm_installed_version: "{{ (item.path | regex_search('pycharm-community-(.*)', '\\1')) | first }}"
   with_items: "{{ pycharm_found_directories.files }}"
-  when: item.path is search('^/opt/pycharm-community-')
   register: pycharm_info
-  tags: common
+  tags: always
+  when: item.path is search('^/opt/pycharm-community-')
 
 - name: set installed_version when not installed
   ansible.builtin.set_fact:
     pycharm_installed_version: "not installed"
+  tags: always
   when: pycharm_installed_version is not defined
-  tags: common
 
 - name: display the pycharm version
   ansible.builtin.debug:
-    msg: 
+    msg:
       - "installed: {{ pycharm_installed_version }}"
       - "available: {{ pycharm_latest_version }}"
-  tags: common
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags: always
 
 - name: when there is no installed_version or it's contents don't match, do these
   block:
@@ -63,13 +66,13 @@
       ansible.builtin.unarchive:
         src: /tmp/pycharm-community.tar.gz
         dest: /opt/
-        mode: '0755'
+        mode: "0755"
 
     - name: remove /tmp/pycharm-community.tar.gz after unarchiving
       ansible.builtin.file:
         path: /tmp/pycharm-community.tar.gz
-        state: absent        
-  
+        state: absent
+
     - name: create a symbolic link to that pycharm is in $PATH
       ansible.builtin.file:
         src: /opt/pycharm-community-{{ pycharm_latest_version }}/bin/pycharm
@@ -80,6 +83,7 @@
       ansible.builtin.template:
         src: pycharm.desktop.j2
         dest: /usr/share/applications/pycharm.desktop
+  ignore_errors: "{{ ansible_check_mode }}"
   become: true
-  tags: common
+  tags: always
   when: pycharm_installed_version != pycharm_latest_version

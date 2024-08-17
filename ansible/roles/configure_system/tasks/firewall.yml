@@ -2,8 +2,8 @@
 - name: enable UFW
   community.general.ufw:
     state: enabled
-  tags: common
   become: true
+  tags: always
 
 # ufw supports connection rate limiting, which is useful for protecting
 # against brute-force login attacks. ufw will deny connections if an IP
@@ -15,8 +15,8 @@
     rule: limit
     port: ssh
     proto: tcp
-  tags: common
   become: true
+  tags: always
 
 - name: allow port range 1714:1764 (kde connect)
   community.general.ufw:
@@ -26,16 +26,16 @@
   with_items:
     - tcp
     - udp
-  tags: home
   become: true
+  tags: home
 
 - name: allow port range 21027 (syncthing)
   community.general.ufw:
     rule: allow
     port: "21027"
     proto: udp
-  tags: home
   become: true
+  tags: home
 
 - name: allow port range 22000 (syncthing)
   community.general.ufw:
@@ -45,13 +45,13 @@
   with_items:
     - tcp
     - udp
-  tags: home
   become: true
+  tags: home
 
 - name: rustdesk web console
   community.general.ufw:
     rule: allow
     port: "21114"
     proto: tcp
-  tags: common
   become: true
+  tags: always

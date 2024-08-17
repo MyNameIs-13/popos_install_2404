@@ -2,21 +2,32 @@
 - name: set timezone to Europe/Brussels
   timezone:
     name: Europe/Brussels
-  tags: common
+  tags: always
 
 - name: configure firewall rules
   ansible.builtin.include_tasks:
     file: firewall.yml
-  tags: common
+  tags: always
 
 - name: configure hibernation
   ansible.builtin.include_tasks:
     file: hibernation.yml
   vars:
     hibernation_user: "skodo"
-  tags: common
+  tags: always
 
 - name: configure automatic switch batterty and ac profile
   ansible.builtin.include_tasks:
     file: autopowerprofile.yml
-  tags: laptop
+  tags: always
+
+- name: check the current day
+  ansible.builtin.shell: "echo $(($(date '+%d')%7))"
+  register: current_day
+  tags: always
+
+- name: upgrade recovery partition
+  ansible.builtin.command: pop-upgrade recovery upgrade from-release
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags: always
+  when: (current_day.stdout | int == 1) and (ansible_distribution_version == "22.04")

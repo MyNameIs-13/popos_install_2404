@@ -4,7 +4,7 @@
     update_cache: yes
     cache_valid_time: 3600
   become: true
-  tags: common
+  tags: always
 
 - name: add brave repo and install
   block:
@@ -27,15 +27,15 @@
       ansible.builtin.apt:
         state: present
         name: brave-browser
-      ignore_errors: true # --check cannot validate that the package is available as the repo is not yet added
-  become: True
-  tags: common
+      ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
+  become: true
+  tags: always
 
 - name: install vesktop.deb package
   ansible.builtin.apt:
     deb: https://vencord.dev/download/vesktop/amd64/deb
-  become: True
-  tags: common
+  become: true
+  tags: always
 
 - name: remove a list of packages
   ansible.builtin.apt:
@@ -43,8 +43,8 @@
     pkg:
       - firefox
       - totem
-  become: True
-  tags: common
+  become: true
+  tags: always
 
 - name: install common command line tools and libs
   ansible.builtin.apt:
@@ -96,8 +96,8 @@
       - texlive-plain-generic
       - texlive-science
       - texlive-xetex
-  become: True
-  tags: common
+  become: true
+  tags: always
 
 - name: install common gui applications
   ansible.builtin.apt:
@@ -113,15 +113,26 @@
       - virt-manager
       - gimp
       - texstudio
-  become: True
-  tags: common
+  become: true
+  tags: always
+
+- name: install common gui applications (22.04 only)
+  ansible.builtin.apt:
+    state: present
+    pkg:
+      - flameshot
+      - evolution
+      - evolution-ews
+  become: true
+  tags: always
+  when: ansible_distribution_version == "22.04"
 
 - name: install home specific command line tools and libs
   ansible.builtin.apt:
     state: present
     pkg:
       - gamemode
-  become: True
+  become: true
   tags: home
 
 - name: install home specific gui applications
@@ -130,7 +141,7 @@
     pkg:
       - lutris
       - steam
-  become: True
+  become: true
   tags: home
 
 - name: install virtual machine tools
@@ -141,7 +152,7 @@
       - open-vm-tools-desktop
       - spice-vdagent
       - spice-webdavd
-  become: True
+  become: true
   tags: vm
 
 - name: add syncthing repo and install
@@ -165,8 +176,8 @@
       ansible.builtin.apt:
         state: present
         name: syncthing
-      ignore_errors: true # --check cannot validate that the package is available as the repo is not yet added
-  become: True
+      ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
+  become: true
   tags: home
 
 - name: add element repo and install
@@ -190,8 +201,8 @@
       ansible.builtin.apt:
         state: present
         name: element-desktop
-      ignore_errors: true # --check cannot validate that the package is available as the repo is not yet added
-  become: True
+      ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
+  become: true
   tags: home
 
 - name: install desktop specific gui applications
@@ -200,25 +211,32 @@
     pkg:
       - conky
       - nextcloud-desktop
-  become: True
+  become: true
   tags: desktop
 
 - name: update all packages to their latest version
   ansible.builtin.apt:
     name: "*"
     state: latest
-  become: True
-  tags: common
+  become: true
+  tags: always
 
 - name: remove dependencies that are no longer required and purge their configuration files
   ansible.builtin.apt:
-    autoremove: yes
+    autoremove: true
     purge: true
-  become: True
-  tags: common
+  become: true
+  tags: always
 
-- name: run the equivalent of "apt-get clean"
+- name: run the equivalent of "apt-get autoclean"
   ansible.builtin.apt:
-    clean: yes
-  become: True
-  tags: common
+    autoclean: true
+  become: true
+  tags: always
+
+- name: run the equivalent of "apt-get autoclean"
+  ansible.builtin.apt:
+    clean: true
+  become: true
+  tags: always
+  when: ansible_distribution_version == "24.04"

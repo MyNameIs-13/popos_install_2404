@@ -64,6 +64,7 @@ chmod +x install.sh
 - define default applications for file extensions
 - [fanctrl](https://github.com/MyNameIs-13/fw-fanctrl/) for framework laptop
 - `pop-upgrade recovery upgrade from-release` equivalent (recovery partition upgrade does not yet exist)
+- adapt ansible to work with other systems (22.04, raspi and SteamOS)
 
 Reason for a todo is one of the following:
 
