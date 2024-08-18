@@ -119,6 +119,5 @@ else
         sudo ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -t "${tags}" -e hibernation_user=${USER}
 
         # FIXME initialize dotfiles repo as soon as it exists
-        # sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply $GITHsUB_USERNAME
-    fi
+        # chezmoi init git@github.com:$GITHUB_USERNAME/dotfiles.git
 fi
