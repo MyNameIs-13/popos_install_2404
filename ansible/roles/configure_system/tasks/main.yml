@@ -4,6 +4,14 @@
     name: Europe/Brussels
   tags: always
 
+- name: add Hack nerdfont
+  ansible.builtin.include_tasks:
+    file: hack-font.yml
+  vars:
+    user: "ryanoasis"
+    repo: "nerd-fonts"
+  tags: always
+
 - name: configure firewall rules
   ansible.builtin.include_tasks:
     file: firewall.yml

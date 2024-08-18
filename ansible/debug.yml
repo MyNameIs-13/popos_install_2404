@@ -33,7 +33,7 @@
         - current_day.stdout | int == 1
         - ansible_distribution_version == "22.04"
   roles:
-    #   - role: configure_system
+    - role: configure_system
     #   - role: apt
     #     when: ansible_os_family == "Debian"
     #   - role: ohmyposh
@@ -43,7 +43,7 @@
     #   - role: rustdesk
     #     when: ansible_os_family == "Debian"
     #   - role: pycharm
-    - role: gamescope
-      when:
-        - ansible_distribution_version == "24.04"
-        - ansible_os_family == "Debian"
+    # - role: gamescope
+    #   when:
+    #     - ansible_distribution_version == "24.04"
+    #     - ansible_os_family == "Debian"
