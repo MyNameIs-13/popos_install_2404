@@ -58,7 +58,7 @@
 - name: ensure the user can suspend without password
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/sleepstates
-    line: "{{ hibernation_user }} ALL=NOPASSWD: /bin/systemctl suspend"
+    line: "{{ main_user }} ALL=NOPASSWD: /bin/systemctl suspend"
     create: yes
     mode: "0440"
   become: true
@@ -67,7 +67,7 @@
 - name: ensure the user can hibernate without password
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/sleepstates
-    line: "{{ hibernation_user }} ALL=NOPASSWD: /bin/systemctl hibernate"
+    line: "{{ main_user }} ALL=NOPASSWD: /bin/systemctl hibernate"
     create: yes
     mode: "0440"
   become: true
@@ -76,7 +76,7 @@
 - name: ensure the user can suspend-then-hibernate without password
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/sleepstates
-    line: "{{ hibernation_user }} ALL=NOPASSWD: /bin/systemctl suspend-then-hibernate"
+    line: "{{ main_user }} ALL=NOPASSWD: /bin/systemctl suspend-then-hibernate"
     create: yes
     mode: "0440"
   become: true
