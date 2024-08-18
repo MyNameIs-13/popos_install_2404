@@ -30,11 +30,11 @@
 
 - name: upgrade recovery partition
   block:
-    - name: check the current day
+    - name: "upgrade recovery partition : check the current day"
       ansible.builtin.shell: "echo $(($(date '+%d')%7))"
       register: current_day
 
-    - name: execute upgrade
+    - name: "upgrade recovery partition : execute upgrade"
       ansible.builtin.command: pop-upgrade recovery upgrade from-release
       ignore_errors: "{{ ansible_check_mode }}"
       when: current_day.stdout | int == 1
