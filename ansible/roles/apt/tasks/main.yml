@@ -59,6 +59,7 @@
       - jq
       - curl
       - git
+      - gh
       - unzip
       - vim
       - gnupg
