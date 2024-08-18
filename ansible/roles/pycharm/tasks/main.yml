@@ -60,7 +60,9 @@
       ansible.builtin.get_url:
         url: "https://download.jetbrains.com/python/pycharm-community-{{ pycharm_latest_version }}.tar.gz"
         dest: /tmp/pycharm-community.tar.gz
-        timeout: 1200
+        timeout: 2000
+        retries: 3
+        delay: 10
       when: ansible_architecture == "x86_64"
 
     - name: download tarball
