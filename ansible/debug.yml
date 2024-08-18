@@ -2,7 +2,7 @@
 # enable only the role which should be testes/debugged
 - hosts: all
   vars:
-    - main_user: "skodo"
+    main_user: "skodo"
   tasks:
     - name: OS family
       debug: msg="{{ ansible_os_family }}"
