@@ -9,6 +9,7 @@
     - role: ohmyposh
     - role: chezmoi
     - role: joplin
+    - role: keyd
     - role: zed-editor
     - role: rustdesk
       when: ansible_os_family == "Debian"
