@@ -53,4 +53,4 @@
   when:
     - rustdesk_installed_version != rustdesk_latest_version
     - ansible_os_family == "Debian"
-    - ansible_architecture == "aarch64
+    - ansible_architecture == "aarch64"
