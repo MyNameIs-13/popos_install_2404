@@ -1,6 +1,8 @@
 ---
 # enable only the role which should be testes/debugged
 - hosts: all
+  vars:
+    - main_user: "skodo"
   tasks:
     - name: OS family
       debug: msg="{{ ansible_os_family }}"
@@ -36,12 +38,12 @@
     #     when: ansible_os_family == "Debian"
     #   - role: ohmyposh
     # - role: chezmoi
-  #   - role: joplin
-  #   - role: zed-editor
-  #   - role: rustdesk
-  #     when: ansible_os_family == "Debian"
-  #   - role: pycharm
-  #   - role: gamescope
-  #     when:
-  #       - ansible_distribution_version == "24.04"
-  #       - ansible_os_family == "Debian"
+    #   - role: joplin
+    #   - role: zed-editor
+    #   - role: rustdesk
+    #     when: ansible_os_family == "Debian"
+    #   - role: pycharm
+    - role: gamescope
+      when:
+        - ansible_distribution_version == "24.04"
+        - ansible_os_family == "Debian"
