@@ -81,7 +81,7 @@
           Name=Joplin
           Comment=Joplin for Desktop
           Exec=/usr/local/bin/Joplin.AppImage %u
-          Icon=/usr/local/share/joplin/Icon512.png
+          Icon=/opt/joplin/Icon512.png
           StartupWMClass=Joplin
           Type=Application
           Categories=Office;
