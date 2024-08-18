@@ -116,8 +116,9 @@ else
             esac
         fi
         inventory="${GIT_PATH}/ansible/localhost"
-        sudo ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -t "${tags}" -e main_user=${USER}
+        ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -t "${tags}" -e main_user=${USER} --ask-become-pass
 
-        # FIXME initialize dotfiles repo as soon as it exists
-        # chezmoi init git@github.com:$GITHUB_USERNAME/dotfiles.git
+        chezmoi init https://github.com/MyNameIs-13/dotfiles.git
+        chezmoi apply
+    fi
 fi
