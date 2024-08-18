@@ -183,7 +183,7 @@
         update_cache: yes
         mode: "0644"
         validate_certs: yes
-        when: ansible_architecture == "x86_64"
+      when: ansible_architecture == "x86_64"
 
     - name: add syncthing apt repository
       ansible.builtin.apt_repository:
@@ -193,7 +193,7 @@
         update_cache: yes
         mode: "0644"
         validate_certs: yes
-        when: ansible_architecture == "aarch64"
+      when: ansible_architecture == "aarch64"
 
     - name: install syncthing
       ansible.builtin.apt:
