@@ -46,12 +46,30 @@
         path: /opt/zed.app
         state: absent
 
-    - name: download and extract tarball
+    - name: download tarball
+      ansible.builtin.get_url:
+        url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ latest_version }}/zed-linux-x86_64.tar.gz
+        dest: /tmp/zed-editor.tar.gz
+        timeout: 1200
+      when: ansible_architecture == "x86_64"
+
+    - name: download tarball
+      ansible.builtin.get_url:
+        url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ latest_version }}/zed-linux-aarch64.tar.gz
+        dest: /tmp/zed-editor.tar.gz
+        timeout: 1200
+      when: ansible_architecture == "aarch64"
+
+    - name: extract tarball
       ansible.builtin.unarchive:
-        src: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ latest_version }}/zed-linux-x86_64.tar.gz
-        dest: /opt
-        remote_src: yes
+        src: /tmp/zed-editor.tar.gz
+        dest: /opt/
         mode: "0755"
+
+    - name: remove /tmp/zed-editor.tar.gz after unarchiving
+      ansible.builtin.file:
+        path: /tmp/zed-editor.tar.gz
+        state: absent
 
     - name: add VERSION file
       ansible.builtin.copy:

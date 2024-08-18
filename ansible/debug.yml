@@ -2,10 +2,23 @@
 # enable only the role which should be testes/debugged
 - hosts: all
   tasks:
+    - name: OS family
+      debug: msg="{{ ansible_os_family }}"
+      tags: always
     - name: Distribution
       debug: msg="{{ ansible_distribution }}"
+      when: ansible_os_family == "Debian"
+      tags: always
     - name: Distribution version
       debug: msg="{{ ansible_distribution_version}}"
+      tags: always
+      when:
+        - ansible_os_family == "Debian"
+        - ("desktop" is in ansible_run_tags)
+    - name: Show facts available on the system
+      ansible.builtin.debug:
+        var: ansible_facts
+      tags: show_facts
     # - name: Distribution major version
     #   debug: msg="{{ ansible_distribution_major_version }}"
     - name: check the current day
@@ -14,14 +27,20 @@
       tags: always
     - debug: msg="{{ current_day.stdout }}"
       tags: always
-      when: (current_day.stdout | int == 1) and (ansible_distribution_version == "22.04")
-  roles:
-    # - role: configure_system
-    # - role: apt
-    # - role: ohmyposh
-    # - role: joplin
-    # - role: zed-editor
-    # - role: rustdesk
-    # - role: pycharm
-    # - role: gamescope
-    #   when: ansible_distribution_version == "24.04"
+      when:
+        - current_day.stdout | int == 1
+        - ansible_distribution_version == "22.04"
+  # roles:
+  #   - role: configure_system
+  #   - role: apt
+  #     when: ansible_os_family == "Debian"
+  #   - role: ohmyposh
+  #   - role: joplin
+  #   - role: zed-editor
+  #   - role: rustdesk
+  #     when: ansible_os_family == "Debian"
+  #   - role: pycharm
+  #   - role: gamescope
+  #     when:
+  #       - ansible_distribution_version == "24.04"
+  #       - ansible_os_family == "Debian"

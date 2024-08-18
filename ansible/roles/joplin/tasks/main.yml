@@ -5,31 +5,31 @@
     url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
     return_content: true
   register: joplin_latest
-  tags: always
+  tags: gui
 
 - name: split version out
   ansible.builtin.set_fact:
     joplin_latest_version: "{{ joplin_latest.json.tag_name | regex_replace('v') }}"
   ignore_errors: "{{ ansible_check_mode }}"
-  tags: always
+  tags: gui
 
 - name: check if /opt/joplin/VERSION exists
   ansible.builtin.stat:
     path: /opt/joplin/VERSION
   register: joplin_VERSION_file
   become: true
-  tags: always
+  tags: gui
 
 - name: set installed_version based on file existence
   ansible.builtin.set_fact:
     joplin_installed_version: "{{ lookup('file', '/opt/joplin/VERSION') }}"
-  tags: always
+  tags: gui
   when: joplin_VERSION_file.stat.exists
 
 - name: set installed_version to 'not installed' if file does not exist
   ansible.builtin.set_fact:
     joplin_installed_version: "not installed"
-  tags: always
+  tags: gui
   when: not joplin_VERSION_file.stat.exists
 
 - name: display the joplin version
@@ -38,7 +38,7 @@
       - "installed: {{ joplin_installed_version }}"
       - "available: {{ joplin_latest_version }}"
   ignore_errors: "{{ ansible_check_mode }}"
-  tags: always
+  tags: gui
 
 - name: when there is no VERSION or it's contents don't match, do these
   block:
@@ -90,5 +90,5 @@
           SingleMainWindow=true
   ignore_errors: "{{ ansible_check_mode }}"
   become: true
-  tags: always
+  tags: gui
   when: joplin_installed_version != joplin_latest_version

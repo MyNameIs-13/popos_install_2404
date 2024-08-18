@@ -15,6 +15,7 @@
   vars:
     hibernation_user: "skodo"
   tags: always
+  when: ("gui" is in ansible_run_tags)
 
 - name: configure automatic switch batterty and ac profile
   ansible.builtin.include_tasks:
@@ -30,4 +31,6 @@
   ansible.builtin.command: pop-upgrade recovery upgrade from-release
   ignore_errors: "{{ ansible_check_mode }}"
   tags: always
-  when: (current_day.stdout | int == 1) and (ansible_distribution_version == "22.04")
+  when:
+    - current_day.stdout | int == 1
+    - ansible_distribution_version == "22.04"

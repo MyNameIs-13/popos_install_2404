@@ -29,13 +29,15 @@
         name: brave-browser
       ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
   become: true
-  tags: always
+  tags: gui
+  when: ansible_architecture == "x86_64"
 
 - name: install vesktop.deb package
   ansible.builtin.apt:
     deb: https://vencord.dev/download/vesktop/amd64/deb
   become: true
-  tags: always
+  tags: gui
+  when: ansible_architecture == "x86_64"
 
 - name: remove a list of packages
   ansible.builtin.apt:
@@ -50,12 +52,8 @@
   ansible.builtin.apt:
     state: present
     pkg:
-      - ansible
       - lm-sensors
       - keyutils
-      - fprintd
-      - libpam-fprintd
-      - nala
       - tar
       - wget
       - jq
@@ -75,13 +73,24 @@
       - libsdl2-image-2.0-0
       - libsecret-tools
       - software-properties-common
-      - mediainfo
-      - v4l2loopback-dkms
       - plocate
-      - gir1.2-gst-plugins-base-1.0
       - golang-go
       - libxkbcommon-dev
       - p7zip
+  become: true
+  tags: always
+
+- name: install common command line tools and libs
+  ansible.builtin.apt:
+    state: present
+    pkg:
+      - ansible
+      - fprintd
+      - libpam-fprintd
+      - nala
+      - libsdl2-2.0-0
+      - libsdl2-image-2.0-0
+      - gir1.2-gst-plugins-base-1.0
       - texlive-base
       - texlive-binaries
       - texlive-extra-utils
@@ -97,7 +106,7 @@
       - texlive-science
       - texlive-xetex
   become: true
-  tags: always
+  tags: gui
 
 - name: install common gui applications
   ansible.builtin.apt:
@@ -114,7 +123,7 @@
       - gimp
       - texstudio
   become: true
-  tags: always
+  tags: gui
 
 - name: install common gui applications (22.04 only)
   ansible.builtin.apt:
@@ -124,7 +133,7 @@
       - evolution
       - evolution-ews
   become: true
-  tags: always
+  tags: gui
   when: ansible_distribution_version == "22.04"
 
 - name: install home specific command line tools and libs
@@ -134,6 +143,7 @@
       - gamemode
   become: true
   tags: home
+  when: ("gui" is in ansible_run_tags)
 
 - name: install home specific gui applications
   ansible.builtin.apt:
@@ -143,6 +153,7 @@
       - steam
   become: true
   tags: home
+  when: ("gui" is in ansible_run_tags)
 
 - name: install virtual machine tools
   ansible.builtin.apt:
@@ -154,6 +165,7 @@
       - spice-webdavd
   become: true
   tags: vm
+  when: ("gui" is in ansible_run_tags)
 
 - name: add syncthing repo and install
   block:
@@ -171,6 +183,17 @@
         update_cache: yes
         mode: "0644"
         validate_certs: yes
+        when: ansible_architecture == "x86_64"
+
+    - name: add syncthing apt repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=arm64 signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable"
+        state: present
+        filename: syncthing
+        update_cache: yes
+        mode: "0644"
+        validate_certs: yes
+        when: ansible_architecture == "aarch64"
 
     - name: install syncthing
       ansible.builtin.apt:
@@ -204,6 +227,7 @@
       ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
   become: true
   tags: home
+  when: ("gui" is in ansible_run_tags)
 
 - name: install desktop specific gui applications
   ansible.builtin.apt:
@@ -213,6 +237,7 @@
       - nextcloud-desktop
   become: true
   tags: desktop
+  when: ("gui" is in ansible_run_tags)
 
 - name: update all packages to their latest version
   ansible.builtin.apt:
