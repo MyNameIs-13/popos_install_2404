@@ -74,7 +74,7 @@ else
 
         if [[ $(fprintd-list ${USER}) != "No devices available" ]]; then
             fprintd-enroll
-            sudo pam-auth-update
+            sudo pam-auth-update --enable "fprintd"
         fi
 
         # Copy install script to drive
