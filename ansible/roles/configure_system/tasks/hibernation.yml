@@ -39,7 +39,7 @@
   tags: always
 
 # TODO: doesn't seem to work in cosmic
-- name: create com.ubuntu.pkla (adds hibernate option to logout menu)
+- name: create com.ubuntu.pkla
   ansible.builtin.copy:
     dest: /etc/polkit-1/localauthority/10-vendor.d/com.ubuntu.pkla
     content: |
@@ -87,14 +87,6 @@
     state: present
     name: python3-psutil
   become: true
-  tags: laptop
-
-# FIXME: doesn't seem to work (probably does not exist in COSMIC)
-- name: configure power-button-action
-  ansible.builtin.dconf:
-    key: "/org/gnome/settings-daemon/plugins/power/power-button-action"
-    value: "'hibernate'"
-    state: present
   tags: laptop
 
 - name: configure sleep-inactive-ac-type

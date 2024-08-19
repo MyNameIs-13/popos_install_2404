@@ -58,8 +58,7 @@ chmod +x install.sh
 
 ## TODO
 
-- keyboard layout
-- hibernation is untested & button in shutdown menu is missing
+- hibernation button in shutdown menu
 - disk encryption forwarding for keyring decryption
 - define default applications for file extensions
 - [fanctrl](https://github.com/MyNameIs-13/fw-fanctrl/) for framework laptop
