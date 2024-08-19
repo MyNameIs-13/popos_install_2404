@@ -72,11 +72,6 @@ else
 
         check_internet "${SSID}" "${ENCRYPTED_FILE}"  # early to have all user interactions together early
 
-        # FIXME remove as soon as cosmic creates keyring and handles encryption pass forwarding
-        echo
-        echo "${BOLD}Create keyring 'Login' with empty password and set as default keyring${NORMAL}"
-        seahorse
-
         if [[ $(fprintd-list ${USER}) != "No devices available" ]]; then
             fprintd-enroll
             sudo pam-auth-update
