@@ -55,6 +55,7 @@
       until: "zed_download is not failed"
       retries: 3
       delay: 10
+      ignore_errors: true
       when: ansible_architecture == "x86_64"
 
     - name: download tarball
@@ -66,6 +67,7 @@
       until: "zed_download is not failed"
       retries: 3
       delay: 10
+      ignore_errors: true
       when: ansible_architecture == "aarch64"
 
     - name: extract tarball
@@ -73,22 +75,26 @@
         src: /tmp/zed-editor.tar.gz
         dest: /opt/
         mode: "0755"
+      when: zed_download is not failed
 
     - name: remove /tmp/zed-editor.tar.gz after unarchiving
       ansible.builtin.file:
         path: /tmp/zed-editor.tar.gz
         state: absent
+      ignore_errors: true
 
     - name: add VERSION file
       ansible.builtin.copy:
         content: "{{ latest_version }}"
         dest: /opt/zed.app/VERSION
+      when: zed_download is not failed
 
     - name: Create a symbolic link
       ansible.builtin.file:
         src: /opt/zed.app/bin/zed
         dest: /usr/local/bin/zed
         state: link
+      when: zed_download is not failed
 
     - name: create desktop file
       ansible.builtin.copy:
@@ -112,6 +118,7 @@
           [Desktop Action NewWorkspace]
           Exec=/opt/zed.app/libexec/zed-editor --new %U
           Name=Open a new workspace
+        when: zed_download is not failed
 
     #https://github.com/zed-industries/zed/issues/15629#issuecomment-2277029842
     - name: workaround for pop!_os nvidia stuff

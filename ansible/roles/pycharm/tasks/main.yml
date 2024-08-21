@@ -76,6 +76,7 @@
       until: "pycharm_download is not failed"
       retries: 3
       delay: 10
+      ignore_errors: true
       when: ansible_architecture == "aarch64"
 
     - name: extract tarball
@@ -83,22 +84,26 @@
         src: /tmp/pycharm-community.tar.gz
         dest: /opt/
         mode: "0755"
+      when: pycharm_download is not failed
 
     - name: remove /tmp/pycharm-community.tar.gz after unarchiving
       ansible.builtin.file:
         path: /tmp/pycharm-community.tar.gz
         state: absent
+      ignore_errors: true
 
     - name: create a symbolic link to that pycharm is in $PATH
       ansible.builtin.file:
         src: /opt/pycharm-community-{{ pycharm_latest_version }}/bin/pycharm
         dest: /usr/local/bin/pycharm
         state: link
+      when: pycharm_download is not failed
 
     - name: template out the desktop file
       ansible.builtin.template:
         src: pycharm.desktop.j2
         dest: /usr/share/applications/pycharm.desktop
+      when: pycharm_download is not failed
   ignore_errors: "{{ ansible_check_mode }}"
   become: true
   tags: gui
