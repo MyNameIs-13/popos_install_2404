@@ -120,7 +120,7 @@ else
             esac
         fi
         inventory="${GIT_PATH}/ansible/localhost"
-        ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -t "${tags}" -e main_user=${USER} --ask-become-pass
+        ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -T 60 -t "${tags}" -e main_user=${USER} --ask-become-pass
 
         git clone https://github.com/MyNameIs-13/dotfiles.git "${GIT_PATH}/../dotfiles"
         chezmoi init --apply --source "${GIT_PATH}/../dotfiles/chezmoi"
