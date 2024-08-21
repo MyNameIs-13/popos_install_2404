@@ -10,13 +10,16 @@ GIT_PATH="/home/${USER}/documents/scm/${REPO_NAME}"
 SSID="Martin Router King"    # Replace with your WiFi SSID
 ENCRYPTED_FILE="${SCRIPT_HOME}/src/wifi_password.gpg"
 
-while getopts u:h:d:p: flag
+while getopts u:h:d:p flag
 do
     case "${flag}" in
         u) user_name_arg=${OPTARG};;
         h) host_name_arg=${OPTARG};;
         d) disk_name_arg=${OPTARG};;
         p) password_arg=${OPTARG};;
+        ?)
+        echo "Usage: $(basename $0) [-u] username [-h] hostname [-d] diskname [-p] password"
+        exit 1;;
     esac
 done
 
@@ -85,7 +88,7 @@ else
 
         sudo update-initramfs -k all -c
 
-        sudo nala upgrade -y
+        # before ansible, otherwise sudo session might been expired (ansible takes a while)
         sudo sensors-detect --auto
 
         # remove autostart file and install script in root
@@ -113,7 +116,7 @@ else
         inventory="${GIT_PATH}/ansible/localhost"
         ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -t "${tags}" -e main_user=${USER} --ask-become-pass
 
-        chezmoi init https://github.com/MyNameIs-13/dotfiles.git
-        chezmoi apply
+        git clone https://github.com/MyNameIs-13/dotfiles.git "${GIT_PATH}/../dotfiles"
+        chezmoi init --apply --source "${GIT_PATH}/../dotfiles/chezmoi"
     fi
 fi
