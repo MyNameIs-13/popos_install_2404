@@ -25,7 +25,7 @@ if [[ "${HOST_NAME}" != *"vm"* ]]; then
     sudo sed -i "s/luks/luks,keyscript=decrypt_keyctl/" /mnt/etc/crypttab
     text_in_file_append "password        optional        pam_gnome_keyring.so use_authtok" /mnt/etc/pam.d/common-password
 
-    swap_UUID=$(sudo blkid | grep /dev/mapper/data-swap | awk '{print $2}' | sed -r "s/(UUID=\")(.*)(\")/\2/")
+    swap_UUID=$(sudo blkid -s UUID -o value /dev/mapper/data-swap)
     command="kernelstub -a  \"mem_sleep_default=deep resume=UUID=${swap_UUID}\""
     sudo chroot /mnt /bin/bash -c "${command}"
 fi
