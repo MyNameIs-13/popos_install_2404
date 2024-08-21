@@ -120,16 +120,6 @@ function text_in_file_append() {
     fi
 }
 
-function visudo-special() {
-    local text="$1"
-
-    if  sudo grep -q "${text}" /etc/sudoers ; then
-        echo "" > /dev/null
-    else
-        echo "${text}" | (sudo EDITOR='tee -a' visudo)
-    fi
-}
-
 function autostart_entry_kde() {
     local part="$1"
 
