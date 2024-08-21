@@ -32,6 +32,13 @@
       when:
         - current_day.stdout | int == 1
         - ansible_distribution_version == "22.04"
+    - command: /usr/bin/false
+      register: result
+      retries: 3
+      delay: 1
+      until: result is not failed
+      ignore_errors: true
+      tags: always
   roles:
     # roles:
     #   - role: configure_system
