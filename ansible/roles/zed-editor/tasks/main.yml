@@ -118,7 +118,7 @@
           [Desktop Action NewWorkspace]
           Exec=/opt/zed.app/libexec/zed-editor --new %U
           Name=Open a new workspace
-        when: zed_download is not failed
+      when: zed_download is not failed
 
     #https://github.com/zed-industries/zed/issues/15629#issuecomment-2277029842
     - name: workaround for pop!_os nvidia stuff
