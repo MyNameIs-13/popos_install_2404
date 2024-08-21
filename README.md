@@ -61,7 +61,6 @@ chmod +x install.sh
 - hibernation button in shutdown menu
 - disk encryption forwarding for keyring decryption
 - define default applications for file extensions
-- [fanctrl](https://github.com/MyNameIs-13/fw-fanctrl/) for framework laptop
 - `pop-upgrade recovery upgrade from-release` equivalent (recovery partition upgrade does not yet exist)
 - adapt ansible to work with other systems (22.04, raspi and SteamOS)
 

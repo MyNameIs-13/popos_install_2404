@@ -84,3 +84,32 @@
         enabled: true
   become: true
   tags: home
+
+- name: framework fanctrl
+  block:
+    - name: clone the gamescope repository
+      ansible.builtin.git:
+        repo: https://github.com/MyNameIs-13/fw-fanctrl.git
+        dest: /opt/fw-fanctrl
+      register: fw_fanctrl_git_status
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: when git repo changed
+      block:
+        - name: check if '/opt' is already in git safe.directory
+          ansible.builtin.command: "git config --global --get-all safe.directory"
+          register: fw_fanctrl_git_safe_directory
+          ignore_errors: true # If there are no safe.directory entries, this will avoid failing the playbook.
+
+        - name: add '/opt' to git safe.directory if not present
+          ansible.builtin.command: "git config --global --add safe.directory '/opt'"
+          when: "'/opt' not in fw_fanctrl_git_safe_directory.stdout_lines"
+
+        - name: install fw-fanctrl
+          ansible.builtin.command: install.sh
+          args:
+            chdir: /opt/fw-fanctrl
+      when: fw_fanctrl_git_status.changed
+  become: true
+  tags: framework
+  when: ansible_distribution_version == "24.04"
