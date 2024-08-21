@@ -145,6 +145,7 @@
         state: present
         pkg:
           - gamemode
+          - mangohud
       tags: home
       when: ("gui" is in ansible_run_tags)
 
