@@ -61,15 +61,21 @@
         url: "https://download.jetbrains.com/python/pycharm-community-{{ pycharm_latest_version }}.tar.gz"
         dest: /tmp/pycharm-community.tar.gz
         timeout: 2000
-        retries: 3
-        delay: 10
+      register: pycharm_download
+      until: "pycharm_download is not failed"
+      retries: 3
+      delay: 10
       when: ansible_architecture == "x86_64"
 
     - name: download tarball
       ansible.builtin.get_url:
         url: "https://download.jetbrains.com/python/pycharm-community-{{ pycharm_latest_version }}-aarch64.tar.gz"
         dest: /tmp/pycharm-community.tar.gz
-        timeout: 1200
+        timeout: 2000
+      register: pycharm_download
+      until: "pycharm_download is not failed"
+      retries: 3
+      delay: 10
       when: ansible_architecture == "aarch64"
 
     - name: extract tarball
