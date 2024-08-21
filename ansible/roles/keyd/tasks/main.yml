@@ -3,6 +3,7 @@
   ansible.builtin.file:
     path: /etc/keyd
     state: directory
+  become: true
   tags: always
 
 - name: create keyd config file
@@ -27,6 +28,7 @@
 
       # Map u to ü
       u = macro(compose u ")
+  become: true
   tags: always
 
 - name: ensure compose:menu
@@ -35,6 +37,8 @@
     regexp: "^XKBOPTIONS="
     line: XKBOPTIONS=,compose:menu
     mode: "0644"
+  become: true
+  tags: always
 
 - name: install required packages
   ansible.builtin.apt:
@@ -81,10 +85,17 @@
         chdir: /opt/keyd
 
     - name: enable keyd
-      ansible.builtin.systemd_service:
+      ansible.builtin.systemd:
         name: keyd
-        state: started
+        state: "started"
         enabled: true
+
+    # BUG: module was rename but does not work yet in  2.10.8
+    # - name: enable keyd
+    #   ansible.builtin.systemd_service:
+    #     name: keyd
+    #     state: "started"
+    #     enabled: true
   become: true
   tags: always
   when: keyd_git_status.changed

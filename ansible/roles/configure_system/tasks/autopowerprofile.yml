@@ -75,7 +75,7 @@
   tags: laptop
 
 - name: enable powerprofile_battery service
-  systemd:
+  ansible.builtin.systemd:
     name: powerprofile_battery.service
     enabled: true
     masked: no
@@ -83,7 +83,7 @@
   tags: laptop
 
 - name: enable powerprofile_balanced service
-  systemd:
+  ansible.builtin.systemd:
     name: powerprofile_balanced.service
     enabled: true
     masked: no
