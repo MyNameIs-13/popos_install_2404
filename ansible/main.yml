@@ -10,6 +10,8 @@
     - role: chezmoi
     - role: joplin
     - role: keyd
+      when:
+        - ansible_distribution_version == "24.04"
     - role: zed-editor
     - role: rustdesk
       when: ansible_os_family == "Debian"
