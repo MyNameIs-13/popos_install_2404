@@ -87,7 +87,7 @@
 
 - name: framework fanctrl
   block:
-    - name: clone the gamescope repository
+    - name: clone the fw-fanctrl repository
       ansible.builtin.git:
         repo: https://github.com/MyNameIs-13/fw-fanctrl.git
         dest: /opt/fw-fanctrl
@@ -106,7 +106,7 @@
           when: "'/opt' not in fw_fanctrl_git_safe_directory.stdout_lines"
 
         - name: install fw-fanctrl
-          ansible.builtin.command: install.sh
+          ansible.builtin.command: ./install.sh
           args:
             chdir: /opt/fw-fanctrl
       when: fw_fanctrl_git_status.changed
