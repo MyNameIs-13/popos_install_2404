@@ -1,234 +1,228 @@
 ---
-- name: run the equivalent of "apt-get update"
-  ansible.builtin.apt:
-    update_cache: yes
-    cache_valid_time: 3600
-  become: true
-  ignore_errors: true # sometimes fails due to 'unkown reason'
-  tags: always
-
-- name: add brave repo and install
+- name: apt
   block:
-    - name: get brave key, save in /usr/share/keyrings for newer apt deb syntax
-      ansible.builtin.get_url:
-        url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
-        dest: /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        mode: "0666"
-
-    - name: add brave apt repository
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"
-        state: present
-        filename: brave-browser-release
+    - name: run the equivalent of "apt-get update"
+      ansible.builtin.apt:
         update_cache: yes
-        mode: "0644"
-        validate_certs: yes
+        cache_valid_time: 3600
+      ignore_errors: true # sometimes fails due to 'unkown reason'
+      tags: always
 
-    - name: install brave browser
+    - name: add brave repo and install
+      block:
+        - name: get brave key, save in /usr/share/keyrings for newer apt deb syntax
+          ansible.builtin.get_url:
+            url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+            dest: /usr/share/keyrings/brave-browser-archive-keyring.gpg
+            mode: "0666"
+
+        - name: add brave apt repository
+          ansible.builtin.apt_repository:
+            repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"
+            state: present
+            filename: brave-browser-release
+            update_cache: yes
+            mode: "0644"
+            validate_certs: yes
+
+        - name: install brave browser
+          ansible.builtin.apt:
+            state: present
+            name: brave-browser
+          ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
+      tags: gui
+      when: ansible_architecture == "x86_64"
+
+    - name: install vesktop.deb package
+      ansible.builtin.apt:
+        deb: https://vencord.dev/download/vesktop/amd64/deb
+      tags: gui
+      when: ansible_architecture == "x86_64"
+
+    - name: remove a list of packages
+      ansible.builtin.apt:
+        state: absent
+        pkg:
+          - firefox
+          - totem
+      tags: always
+
+    - name: install common command line tools and libs
       ansible.builtin.apt:
         state: present
-        name: brave-browser
-      ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
-  become: true
-  tags: gui
-  when: ansible_architecture == "x86_64"
+        pkg:
+          - age
+          - lm-sensors
+          - keyutils
+          - tar
+          - wget
+          - jq
+          - curl
+          - git
+          - unzip
+          - vim
+          - gnupg
+          - lsb-release
+          - apt-transport-https
+          - ca-certificates
+          - python3-pip
+          - python3-github
+          - python3-venv
+          - python3-psutil
+          - libsdl2-2.0-0
+          - libsdl2-image-2.0-0
+          - libsecret-tools
+          - software-properties-common
+          - plocate
+          - golang-go
+          - libxkbcommon-dev
+          - p7zip
+      tags: always
 
-- name: install vesktop.deb package
-  ansible.builtin.apt:
-    deb: https://vencord.dev/download/vesktop/amd64/deb
-  become: true
-  tags: gui
-  when: ansible_architecture == "x86_64"
-
-- name: remove a list of packages
-  ansible.builtin.apt:
-    state: absent
-    pkg:
-      - firefox
-      - totem
-  become: true
-  tags: always
-
-- name: install common command line tools and libs
-  ansible.builtin.apt:
-    state: present
-    pkg:
-      - age
-      - lm-sensors
-      - keyutils
-      - tar
-      - wget
-      - jq
-      - curl
-      - git
-      - git-credential-oauth
-      - unzip
-      - vim
-      - gnupg
-      - lsb-release
-      - apt-transport-https
-      - ca-certificates
-      - python3-pip
-      - python3-github
-      - python3-venv
-      - python3-psutil
-      - libsdl2-2.0-0
-      - libsdl2-image-2.0-0
-      - libsecret-tools
-      - software-properties-common
-      - plocate
-      - golang-go
-      - libxkbcommon-dev
-      - p7zip
-  become: true
-  tags: always
-
-- name: install common command line tools and libs
-  ansible.builtin.apt:
-    state: present
-    pkg:
-      - ansible
-      - fprintd
-      - libpam-fprintd
-      - nala
-      - libsdl2-2.0-0
-      - libsdl2-image-2.0-0
-      - gir1.2-gst-plugins-base-1.0
-      - texlive-base
-      - texlive-binaries
-      - texlive-extra-utils
-      - texlive-fonts-recommended
-      - texlive-lang-german
-      - texlive-lang-greek
-      - texlive-latex-base
-      - texlive-latex-extra
-      - texlive-latex-recommended
-      - texlive-luatex
-      - texlive-pictures
-      - texlive-plain-generic
-      - texlive-science
-      - texlive-xetex
-  become: true
-  tags: gui
-
-- name: install common gui applications
-  ansible.builtin.apt:
-    state: present
-    pkg:
-      - celluloid
-      - obs-studio
-      - kdenlive
-      - rpi-imager
-      - pavucontrol
-      - code
-      - keepassxc
-      - virt-manager
-      - gimp
-      - texstudio
-  become: true
-  tags: gui
-
-- name: install common gui applications (22.04 only)
-  ansible.builtin.apt:
-    state: present
-    pkg:
-      - flameshot
-      - evolution
-      - evolution-ews
-  become: true
-  tags: gui
-  when: ansible_distribution_version == "22.04"
-
-- name: install home specific command line tools and libs
-  ansible.builtin.apt:
-    state: present
-    pkg:
-      - gamemode
-  become: true
-  tags: home
-  when: ("gui" is in ansible_run_tags)
-
-- name: install home specific gui applications
-  ansible.builtin.apt:
-    state: present
-    pkg:
-      - lutris
-      - steam
-  become: true
-  tags: home
-  when: ("gui" is in ansible_run_tags)
-
-- name: install virtual machine tools
-  ansible.builtin.apt:
-    state: present
-    pkg:
-      - open-vm-tools
-      - open-vm-tools-desktop
-      - spice-vdagent
-      - spice-webdavd
-  become: true
-  tags: vm
-  when: ("gui" is in ansible_run_tags)
-
-- name: add element repo and install
-  block:
-    - name: get element key, save in /usr/share/keyrings for newer apt deb syntax
-      ansible.builtin.get_url:
-        url: https://packages.element.io/debian/element-io-archive-keyring.gpg
-        dest: /usr/share/keyrings/element-io-archive-keyring.gpg
-        mode: "0666"
-
-    - name: add element apt repository
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/element-io-archive-keyring.gpg] https://packages.element.io/debian/ default main"
-        state: present
-        filename: element-io
-        update_cache: yes
-        mode: "0644"
-        validate_certs: yes
-
-    - name: install element
+    - name: install common command line tools and libs (24.04)
       ansible.builtin.apt:
         state: present
-        name: element-desktop
-      ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
-  become: true
-  tags: home
-  when: ("gui" is in ansible_run_tags)
+        pkg:
+          - git-credential-oauth
+      tags: always
+      when: ansible_distribution_version == "24.04"
 
-- name: install desktop specific gui applications
-  ansible.builtin.apt:
-    state: present
-    pkg:
-      - conky
-      - nextcloud-desktop
-  become: true
-  tags: desktop
-  when: ("gui" is in ansible_run_tags)
+    - name: install common command line tools and libs
+      ansible.builtin.apt:
+        state: present
+        pkg:
+          - ansible
+          - fprintd
+          - libpam-fprintd
+          - nala
+          - libsdl2-2.0-0
+          - libsdl2-image-2.0-0
+          - gir1.2-gst-plugins-base-1.0
+          - texlive-base
+          - texlive-binaries
+          - texlive-extra-utils
+          - texlive-fonts-recommended
+          - texlive-lang-german
+          - texlive-lang-greek
+          - texlive-latex-base
+          - texlive-latex-extra
+          - texlive-latex-recommended
+          - texlive-luatex
+          - texlive-pictures
+          - texlive-plain-generic
+          - texlive-science
+          - texlive-xetex
+      tags: gui
 
-- name: update all packages to their latest version
-  ansible.builtin.apt:
-    name: "*"
-    state: latest
-  become: true
-  tags: always
+    - name: install common gui applications
+      ansible.builtin.apt:
+        state: present
+        pkg:
+          - celluloid
+          - obs-studio
+          - kdenlive
+          - rpi-imager
+          - pavucontrol
+          - code
+          - keepassxc
+          - virt-manager
+          - gimp
+          - texstudio
+      tags: gui
 
-- name: remove dependencies that are no longer required and purge their configuration files
-  ansible.builtin.apt:
-    autoremove: true
-    purge: true
-  become: true
-  tags: always
+    - name: install common gui applications (22.04 only)
+      ansible.builtin.apt:
+        state: present
+        pkg:
+          - flameshot
+          - evolution
+          - evolution-ews
+      tags: gui
+      when: ansible_distribution_version == "22.04"
 
-- name: run the equivalent of "apt-get autoclean"
-  ansible.builtin.apt:
-    autoclean: true
-  become: true
-  tags: always
+    - name: install home specific command line tools and libs
+      ansible.builtin.apt:
+        state: present
+        pkg:
+          - gamemode
+      tags: home
+      when: ("gui" is in ansible_run_tags)
 
-- name: run the equivalent of "apt-get autoclean"
-  ansible.builtin.apt:
-    clean: true
+    - name: install home specific gui applications
+      ansible.builtin.apt:
+        state: present
+        pkg:
+          - lutris
+          - steam
+      tags: home
+      when: ("gui" is in ansible_run_tags)
+
+    - name: install virtual machine tools
+      ansible.builtin.apt:
+        state: present
+        pkg:
+          - open-vm-tools
+          - open-vm-tools-desktop
+          - spice-vdagent
+          - spice-webdavd
+      tags: vm
+      when: ("gui" is in ansible_run_tags)
+
+    - name: add element repo and install
+      block:
+        - name: get element key, save in /usr/share/keyrings for newer apt deb syntax
+          ansible.builtin.get_url:
+            url: https://packages.element.io/debian/element-io-archive-keyring.gpg
+            dest: /usr/share/keyrings/element-io-archive-keyring.gpg
+            mode: "0666"
+
+        - name: add element apt repository
+          ansible.builtin.apt_repository:
+            repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/element-io-archive-keyring.gpg] https://packages.element.io/debian/ default main"
+            state: present
+            filename: element-io
+            update_cache: yes
+            mode: "0644"
+            validate_certs: yes
+
+        - name: install element
+          ansible.builtin.apt:
+            state: present
+            name: element-desktop
+          ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
+      tags: home
+      when: ("gui" is in ansible_run_tags)
+
+    - name: install desktop specific gui applications
+      ansible.builtin.apt:
+        state: present
+        pkg:
+          - conky
+          - nextcloud-desktop
+      tags: desktop
+      when: ("gui" is in ansible_run_tags)
+
+    - name: update all packages to their latest version
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+      tags: always
+
+    - name: remove dependencies that are no longer required and purge their configuration files
+      ansible.builtin.apt:
+        autoremove: true
+        purge: true
+      tags: always
+
+    - name: run the equivalent of "apt-get autoclean"
+      ansible.builtin.apt:
+        autoclean: true
+      tags: always
+
+    - name: run the equivalent of "apt-get autoclean"
+      ansible.builtin.apt:
+        clean: true
+      tags: always
+      when: ansible_distribution_version == "24.04"
   become: true
-  tags: always
-  when: ansible_distribution_version == "24.04"
+  when: ansible_os_family == "Debian"

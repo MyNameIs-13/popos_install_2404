@@ -1,101 +1,94 @@
 ---
-- name: creates /etc/keyd
-  ansible.builtin.file:
-    path: /etc/keyd
-    state: directory
-  become: true
-  tags: always
-
-- name: create keyd config file
-  ansible.builtin.copy:
-    dest: /etc/keyd/default.conf
-    content: |
-      [ids]
-
-      *
-
-      [main]
-
-      rightalt = layer(dia)
-
-      [dia]
-
-      # Map o to ö
-      o = macro(compose o ")
-
-      # Map a to ä
-      a = macro(compose a ")
-
-      # Map u to ü
-      u = macro(compose u ")
-  become: true
-  tags: always
-
-- name: ensure compose:menu
-  ansible.builtin.lineinfile:
-    path: /etc/vconsole.conf
-    regexp: "^XKBOPTIONS="
-    line: XKBOPTIONS=,compose:menu
-    mode: "0644"
-  become: true
-  tags: always
-
-- name: install required packages
-  ansible.builtin.apt:
-    name:
-      - cmake
-      - make
-    state: present
-  become: true
-  tags: always
-
-- name: clone the keyd repository
-  ansible.builtin.git:
-    repo: https://github.com/rvaiya/keyd
-    dest: /opt/keyd
-  register: keyd_git_status
-  ignore_errors: "{{ ansible_check_mode }}"
-  become: true
-  tags: always
-
-- name: when git repo changed
+- name: keyd
   block:
-    - name: check if '/opt' is already in git safe.directory
-      ansible.builtin.command: "git config --global --get-all safe.directory"
-      register: keyd_git_safe_directory
-      ignore_errors: true # If there are no safe.directory entries, this will avoid failing the playbook.
+    - name: creates /etc/keyd
+      ansible.builtin.file:
+        path: /etc/keyd
+        state: directory
 
-    - name: add '/opt' to git safe.directory if not present
-      ansible.builtin.command: "git config --global --add safe.directory '/opt'"
-      when: "'/opt' not in keyd_git_safe_directory.stdout_lines"
+    - name: create keyd config file
+      ansible.builtin.copy:
+        dest: /etc/keyd/default.conf
+        content: |
+          [ids]
 
-    - name: git clean
-      ansible.builtin.command: git clean -f
-      args:
-        chdir: /opt/keyd
+          *
 
-    - name: make
-      ansible.builtin.command: make
-      args:
-        chdir: /opt/keyd
+          [main]
 
-    - name: make install
-      ansible.builtin.command: make install
-      args:
-        chdir: /opt/keyd
+          rightalt = layer(dia)
 
-    - name: enable keyd
-      ansible.builtin.systemd:
-        name: keyd
-        state: "started"
-        enabled: true
+          [dia]
 
-    # BUG: module was rename but does not work yet in  2.10.8
-    # - name: enable keyd
-    #   ansible.builtin.systemd_service:
-    #     name: keyd
-    #     state: "started"
-    #     enabled: true
-  become: true
+          # Map o to ö
+          o = macro(compose o ")
+
+          # Map a to ä
+          a = macro(compose a ")
+
+          # Map u to ü
+          u = macro(compose u ")
+
+    - name: ensure compose:menu
+      ansible.builtin.lineinfile:
+        path: /etc/vconsole.conf
+        regexp: "^XKBOPTIONS="
+        line: XKBOPTIONS=,compose:menu
+        mode: "0644"
+
+    - name: install required packages
+      ansible.builtin.apt:
+        name:
+          - cmake
+          - make
+        state: present
+
+    - name: clone the keyd repository
+      ansible.builtin.git:
+        repo: https://github.com/rvaiya/keyd
+        dest: /opt/keyd
+      register: keyd_git_status
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: when git repo changed
+      block:
+        - name: check if '/opt' is already in git safe.directory
+          ansible.builtin.command: "git config --global --get-all safe.directory"
+          register: keyd_git_safe_directory
+          ignore_errors: true # If there are no safe.directory entries, this will avoid failing the playbook.
+
+        - name: add '/opt' to git safe.directory if not present
+          ansible.builtin.command: "git config --global --add safe.directory '/opt'"
+          when: "'/opt' not in keyd_git_safe_directory.stdout_lines"
+
+        - name: git clean
+          ansible.builtin.command: git clean -f
+          args:
+            chdir: /opt/keyd
+
+        - name: make
+          ansible.builtin.command: make
+          args:
+            chdir: /opt/keyd
+
+        - name: make install
+          ansible.builtin.command: make install
+          args:
+            chdir: /opt/keyd
+
+        - name: enable keyd
+          ansible.builtin.systemd:
+            name: keyd
+            state: "started"
+            enabled: true
+
+        # BUG: module was rename but does not work yet in  2.10.8
+        # - name: enable keyd
+        #   ansible.builtin.systemd_service:
+        #     name: keyd
+        #     state: "started"
+        #     enabled: true
+      when: keyd_git_status.changed
   tags: always
-  when: keyd_git_status.changed
+  become: true
+  when: ansible_distribution_version == "24.04"

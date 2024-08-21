@@ -5,18 +5,11 @@
   roles:
     - role: configure_system
     - role: apt
-      when: ansible_os_family == "Debian"
     - role: ohmyposh
     - role: chezmoi
     - role: joplin
     - role: keyd
-      when:
-        - ansible_distribution_version == "24.04"
     - role: zed-editor
     - role: rustdesk
-      when: ansible_os_family == "Debian"
     - role: pycharm
     - role: gamescope
-      when:
-        - ansible_distribution_version == "24.04"
-        - ansible_os_family == "Debian"

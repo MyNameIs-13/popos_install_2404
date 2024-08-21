@@ -1,56 +1,53 @@
 ---
-- name: scrape URL for latest version
-  ansible.builtin.uri:
-    url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
-    return_content: true
-  register: rustdesk_latest
-  tags: gui
+- name: rustdesk
+  block:
+    - name: scrape URL for latest version
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
+        return_content: true
+      register: rustdesk_latest
 
-- name: split version out
-  ansible.builtin.set_fact:
-    rustdesk_latest_version: "{{ rustdesk_latest.json.tag_name }}"
-  ignore_errors: "{{ ansible_check_mode }}"
-  tags: gui
+    - name: split version out
+      ansible.builtin.set_fact:
+        rustdesk_latest_version: "{{ rustdesk_latest.json.tag_name }}"
+      ignore_errors: "{{ ansible_check_mode }}"
 
-- name: check installed rustdesk version
-  ansible.builtin.command: /usr/bin/rustdesk --version
-  register: rustdesk_installed_version_output
-  ignore_errors: true
-  tags: gui
+    - name: check installed rustdesk version
+      ansible.builtin.command: /usr/bin/rustdesk --version
+      register: rustdesk_installed_version_output
+      ignore_errors: true
 
-- name: save installed rustdesk version as a fact
-  ansible.builtin.set_fact:
-    rustdesk_installed_version: "{{ rustdesk_installed_version_output.stdout if rustdesk_installed_version_output.rc == 0 else 'not installed' }}"
-  ignore_errors: "{{ ansible_check_mode }}"
-  tags: gui
-  when: rustdesk_installed_version_output is defined
+    - name: save installed rustdesk version as a fact
+      ansible.builtin.set_fact:
+        rustdesk_installed_version: "{{ rustdesk_installed_version_output.stdout if rustdesk_installed_version_output.rc == 0 else 'not installed' }}"
+      ignore_errors: "{{ ansible_check_mode }}"
+      when: rustdesk_installed_version_output is defined
 
-- name: display the rustdesk version
-  ansible.builtin.debug:
-    msg:
-      - "installed: {{ rustdesk_installed_version }}"
-      - "available: {{ rustdesk_latest_version }}"
-  ignore_errors: "{{ ansible_check_mode }}"
-  tags: gui
+    - name: display the rustdesk version
+      ansible.builtin.debug:
+        msg:
+          - "installed: {{ rustdesk_installed_version }}"
+          - "available: {{ rustdesk_latest_version }}"
+      ignore_errors: "{{ ansible_check_mode }}"
 
-- name: install rustdesk
-  ansible.builtin.apt:
-    deb: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ rustdesk_latest_version }}/rustdesk-{{ rustdesk_latest_version }}-x86_64.deb
-  ignore_errors: "{{ ansible_check_mode }}"
-  become: True
-  tags: gui
-  when:
-    - rustdesk_installed_version != rustdesk_latest_version
-    - ansible_os_family == "Debian"
-    - ansible_architecture == "x86_64"
+    - name: install rustdesk
+      ansible.builtin.apt:
+        deb: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ rustdesk_latest_version }}/rustdesk-{{ rustdesk_latest_version }}-x86_64.deb
+      ignore_errors: "{{ ansible_check_mode }}"
+      become: True
+      when:
+        - rustdesk_installed_version != rustdesk_latest_version
+        - ansible_os_family == "Debian"
+        - ansible_architecture == "x86_64"
 
-- name: install rustdesk
-  ansible.builtin.apt:
-    deb: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ rustdesk_latest_version }}/rustdesk-{{ rustdesk_latest_version }}-aarch64.deb
-  ignore_errors: "{{ ansible_check_mode }}"
-  become: True
+    - name: install rustdesk
+      ansible.builtin.apt:
+        deb: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ rustdesk_latest_version }}/rustdesk-{{ rustdesk_latest_version }}-aarch64.deb
+      ignore_errors: "{{ ansible_check_mode }}"
+      become: True
+      when:
+        - rustdesk_installed_version != rustdesk_latest_version
+        - ansible_os_family == "Debian"
+        - ansible_architecture == "aarch64"
   tags: gui
-  when:
-    - rustdesk_installed_version != rustdesk_latest_version
-    - ansible_os_family == "Debian"
-    - ansible_architecture == "aarch64"
+  when: ansible_os_family == "Debian"
