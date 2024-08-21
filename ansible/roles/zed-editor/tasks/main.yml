@@ -51,6 +51,10 @@
         url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ latest_version }}/zed-linux-x86_64.tar.gz
         dest: /tmp/zed-editor.tar.gz
         timeout: 1200
+      register: zed_download
+      until: "zed_download is not failed"
+      retries: 3
+      delay: 10
       when: ansible_architecture == "x86_64"
 
     - name: download tarball
@@ -58,6 +62,10 @@
         url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ latest_version }}/zed-linux-aarch64.tar.gz
         dest: /tmp/zed-editor.tar.gz
         timeout: 1200
+      register: zed_download
+      until: "zed_download is not failed"
+      retries: 3
+      delay: 10
       when: ansible_architecture == "aarch64"
 
     - name: extract tarball
