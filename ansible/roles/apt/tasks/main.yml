@@ -52,6 +52,7 @@
   ansible.builtin.apt:
     state: present
     pkg:
+      - age
       - lm-sensors
       - keyutils
       - tar
@@ -59,7 +60,7 @@
       - jq
       - curl
       - git
-      - gh
+      - git-credential-oauth
       - unzip
       - vim
       - gnupg
@@ -167,42 +168,6 @@
   become: true
   tags: vm
   when: ("gui" is in ansible_run_tags)
-
-- name: add syncthing repo and install
-  block:
-    - name: get syncthing key, save in /usr/share/keyrings for newer apt deb syntax
-      ansible.builtin.get_url:
-        url: https://syncthing.net/release-key.gpg
-        dest: /usr/share/keyrings/syncthing-archive-keyring.gpg
-        mode: "0666"
-
-    - name: add syncthing apt repository
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable"
-        state: present
-        filename: syncthing
-        update_cache: yes
-        mode: "0644"
-        validate_certs: yes
-      when: ansible_architecture == "x86_64"
-
-    - name: add syncthing apt repository
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=arm64 signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable"
-        state: present
-        filename: syncthing
-        update_cache: yes
-        mode: "0644"
-        validate_certs: yes
-      when: ansible_architecture == "aarch64"
-
-    - name: install syncthing
-      ansible.builtin.apt:
-        state: present
-        name: syncthing
-      ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
-  become: true
-  tags: home
 
 - name: add element repo and install
   block:
