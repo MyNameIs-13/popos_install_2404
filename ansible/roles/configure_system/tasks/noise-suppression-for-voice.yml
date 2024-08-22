@@ -64,5 +64,5 @@
       when: nsfv_download is not failed
   ignore_errors: "{{ ansible_check_mode }}"
   become: true
-  tags: always
+  tags: home
   when: nsfv_installed_version != nsfv_latest_version
