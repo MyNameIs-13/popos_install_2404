@@ -146,8 +146,11 @@
         pkg:
           - gamemode
           - mangohud
+          - mangoapp
       tags: home
-      when: ("gui" is in ansible_run_tags)
+      when:
+        - ("gui" is in ansible_run_tags)
+        - ansible_distribution_version == "24.04"
 
     - name: install home specific gui applications
       ansible.builtin.apt:
