@@ -120,6 +120,7 @@ else
             esac
         fi
         inventory="${GIT_PATH}/ansible/localhost"
+        # TODO: add error handling in case ansible-playbook stops
         ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -T 60 -t "${tags}" -e main_user=${USER} --ask-become-pass
 
         git clone https://github.com/MyNameIs-13/dotfiles.git "${GIT_PATH}/../dotfiles"
