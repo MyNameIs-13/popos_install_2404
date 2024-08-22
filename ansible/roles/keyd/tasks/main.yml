@@ -46,35 +46,35 @@
     - name: clone the keyd repository
       ansible.builtin.git:
         repo: https://github.com/rvaiya/keyd
-        dest: /opt/keyd
+        dest: /usr/local/keyd
       register: keyd_git_status
       ignore_errors: "{{ ansible_check_mode }}"
 
     - name: when git repo changed
       block:
-        - name: check if '/opt' is already in git safe.directory
+        - name: check if '/usr/local' is already in git safe.directory
           ansible.builtin.command: "git config --global --get-all safe.directory"
           register: keyd_git_safe_directory
           ignore_errors: true # If there are no safe.directory entries, this will avoid failing the playbook.
 
-        - name: add '/opt' to git safe.directory if not present
-          ansible.builtin.command: "git config --global --add safe.directory '/opt'"
-          when: "'/opt' not in keyd_git_safe_directory.stdout_lines"
+        - name: add '/usr/local' to git safe.directory if not present
+          ansible.builtin.command: "git config --global --add safe.directory '/usr/local'"
+          when: "'/usr/local' not in keyd_git_safe_directory.stdout_lines"
 
         - name: git clean
           ansible.builtin.command: git clean -f
           args:
-            chdir: /opt/keyd
+            chdir: /usr/local/keyd
 
         - name: make
           ansible.builtin.command: make
           args:
-            chdir: /opt/keyd
+            chdir: /usr/local/keyd
 
         - name: make install
           ansible.builtin.command: make install
           args:
-            chdir: /opt/keyd
+            chdir: /usr/local/keyd
 
         - name: enable keyd
           ansible.builtin.systemd:

@@ -57,7 +57,7 @@
     - name: clone the gamescope repository
       ansible.builtin.git:
         repo: https://github.com/ValveSoftware/gamescope.git
-        dest: /opt/gamescope
+        dest: /usr/local/gamescope
         single_branch: true
         version: "3.14.24"
       register: gamescope_git_status
@@ -65,40 +65,40 @@
 
     - name: when git repo changed
       block:
-        - name: check if '/opt' is already in git safe.directory
+        - name: check if '/usr/local' is already in git safe.directory
           ansible.builtin.command: "git config --global --get-all safe.directory"
           register: gamescope_git_safe_directory
           ignore_errors: true # If there are no safe.directory entries, this will avoid failing the playbook.
 
-        - name: add '/opt' to git safe.directory if not present
-          ansible.builtin.command: "git config --global --add safe.directory '/opt'"
-          when: "'/opt' not in gamescope_git_safe_directory.stdout_lines"
+        - name: add '/usr/local' to git safe.directory if not present
+          ansible.builtin.command: "git config --global --add safe.directory '/usr/local'"
+          when: "'/usr/local' not in gamescope_git_safe_directory.stdout_lines"
 
         - name: remove old builds and build attempts
           ansible.builtin.file:
             state: absent
-            dest: /opt/gamescope/build
+            dest: /usr/local/gamescope/build
 
         - name: run meson to configure the build directory
           ansible.builtin.command: meson setup build/
           args:
-            chdir: /opt/gamescope
+            chdir: /usr/local/gamescope
 
         - name: compile the project with ninja
           ansible.builtin.command: ninja -C build/
           args:
-            chdir: /opt/gamescope
+            chdir: /usr/local/gamescope
 
         - name: install the compiled project
           ansible.builtin.command: meson install -C build/ --skip-subprojects
           args:
-            chdir: /opt/gamescope
+            chdir: /usr/local/gamescope
 
         # removed due to: https://github.com/ValveSoftware/gamescope/issues/107
         # - name: setcap
         #   ansible.builtin.command: setcap 'CAP_SYS_NICE=eip' /usr/local/bin/gamescope
         #   args:
-        #     chdir: /opt/gamescope
+        #     chdir: /usr/local/gamescope
       when: gamescope_git_status.changed
   become: true
   tags: home

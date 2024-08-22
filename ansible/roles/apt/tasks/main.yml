@@ -77,6 +77,7 @@
           - golang-go
           - libxkbcommon-dev
           - p7zip
+          - npm
       tags: always
 
     - name: install common command line tools and libs (24.04)
