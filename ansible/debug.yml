@@ -41,8 +41,8 @@
       tags: always
   roles:
     # roles:
-    #   - role: configure_system
     #   - role: apt
+    #   - role: configure_system
     #   - role: ohmyposh
     #   - role: chezmoi
     #   - role: joplin
