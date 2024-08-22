@@ -1,0 +1,37 @@
+---
+- name: arrpc
+  block:
+    - name: install required packages
+      ansible.builtin.apt:
+        name:
+          - git
+          - npm
+        state: present
+
+    - name: clone the arrpc repository
+      ansible.builtin.git:
+        repo: https://github.com//{{ user }}/{{ repo }}.git
+        dest: /usr/local/arrpc
+      register: arrpc_git_status
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: when git repo changed
+      block:
+        - name: check if '/usr/local' is already in git safe.directory
+          ansible.builtin.command: "git config --global --get-all safe.directory"
+          register: arrpc_git_safe_directory
+          ignore_errors: true # If there are no safe.directory entries, this will avoid failing the playbook.
+
+        - name: add '/usr/local' to git safe.directory if not present
+          ansible.builtin.command: "git config --global --add safe.directory '/usr/local'"
+          when: "'/usr/local' not in arrpc_git_safe_directory.stdout_lines"
+
+        - name: install the arrpc
+          ansible.builtin.command: npm install
+          args:
+            chdir: /usr/local/arrpc
+      when: arrpc_git_status.changed
+  become: true
+  tags: home
+  when:
+    - ansible_os_family == "Debian"

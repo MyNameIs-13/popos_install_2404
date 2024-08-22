@@ -1,0 +1,68 @@
+---
+- name: scrape URL for latest version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
+    return_content: true
+  register: nsfv_latest
+  tags: home
+
+- name: split version out
+  ansible.builtin.set_fact:
+    nsfv_latest_version: "{{ nsfv_latest.json.tag_name }}"
+  tags: home
+
+- name: check if /usr/local/noise-suppression-for-voice/VERSION exists
+  ansible.builtin.stat:
+    path: /usr/local/noise-suppression-for-voice/VERSION
+  register: nsfv_VERSION_file
+  become: true
+  tags: home
+
+- name: set installed_version based on file existence
+  ansible.builtin.set_fact:
+    nsfv_installed_version: "{{ lookup('file', '/usr/local/noise-suppression-for-voice/VERSION') }}"
+  tags: home
+  when: nsfv_VERSION_file.stat.exists
+
+- name: set installed_version to 'not installed' if file does not exist
+  ansible.builtin.set_fact:
+    nsfv_installed_version: "not installed"
+  tags: home
+  when: not nsfv_VERSION_file.stat.exists
+
+- name: display the nsfv version
+  ansible.builtin.debug:
+    msg:
+      - "installed: {{ nsfv_installed_version }}"
+      - "available: {{ nsfv_latest_version }}"
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags: home
+
+- name: when there is no VERSION or it's contents don't match, do these
+  block:
+    - name: delete previous version
+      ansible.builtin.file:
+        name: /usr/local/noise-suppression-for-voice
+        state: absent
+
+    - name: create empty folder
+      ansible.builtin.file:
+        path: /usr/local/noise-suppression-for-voice
+        state: directory
+
+    - name: Download nsfv
+      ansible.builtin.unarchive:
+        src: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ nsfv_latest_version }}/linux-rnnoise.zip
+        dest: "/usr/local/noise-suppression-for-voice"
+        remote_src: yes
+      register: nsfv_download
+
+    - name: add VERSION file
+      ansible.builtin.copy:
+        content: "{{ nsfv_latest_version }}"
+        dest: /usr/local/noise-suppression-for-voice/VERSION
+      when: nsfv_download is not failed
+  ignore_errors: "{{ ansible_check_mode }}"
+  become: true
+  tags: always
+  when: nsfv_installed_version != nsfv_latest_version
