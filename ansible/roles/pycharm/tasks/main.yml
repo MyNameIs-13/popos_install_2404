@@ -107,20 +107,9 @@
       when: pycharm_download is not failed
 
     - name: create desktop file
-      ansible.builtin.copy:
+      ansible.builtin.template:
+        src: pycharm.desktop.j2
         dest: /usr/share/applications/pycharm.desktop
-        content: |
-          [Desktop Entry]
-          Version=1.0
-          Type=Application
-          Name=PyCharm Community Edition
-          Icon=pycharm
-          Exec=/usr/local/bin/pycharm
-          Comment=Python IDE for Professional Developers
-          Categories=Development;IDE;
-          Terminal=false
-          StartupWMClass=jetbrains-pycharm-ce
-          StartupNotify=true
       when: pycharm_download is not failed
 
   ignore_errors: "{{ ansible_check_mode }}"
