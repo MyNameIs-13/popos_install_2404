@@ -126,7 +126,6 @@
           - pavucontrol
           - code
           - keepassxc
-          - virt-manager
           - gimp
           - texstudio
       tags: gui
@@ -159,6 +158,9 @@
         pkg:
           - lutris
           - steam
+          - conky
+          - nextcloud-desktop
+          - virt-manager
       tags: home
       when: ("gui" is in ansible_run_tags)
 
@@ -196,15 +198,6 @@
             name: element-desktop
           ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
       tags: home
-      when: ("gui" is in ansible_run_tags)
-
-    - name: install desktop specific gui applications
-      ansible.builtin.apt:
-        state: present
-        pkg:
-          - conky
-          - nextcloud-desktop
-      tags: desktop
       when: ("gui" is in ansible_run_tags)
 
     - name: update all packages to their latest version
