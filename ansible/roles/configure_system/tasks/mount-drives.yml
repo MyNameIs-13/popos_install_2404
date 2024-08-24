@@ -30,5 +30,6 @@
         state: mounted
         dump: 0
         passno: 0
+  become: true
   tags: desktop
   when: ("mean-machine" in ansible_hostname)
