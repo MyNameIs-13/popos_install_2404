@@ -71,3 +71,8 @@
     user: "werman"
     repo: "noise-suppression-for-voice"
   tags: home
+
+- name: mount mean-machine drives
+  ansible.builtin.include_tasks:
+    file: mount-drives.yml
+  tags: always

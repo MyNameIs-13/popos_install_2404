@@ -1,0 +1,34 @@
+---
+- name: mount mean-machine drives
+  block:
+    - name: mount games disk
+      mount:
+        path: /home/skodo/games
+        src: /dev/disk/by-partuuid/67a81aa9-181f-44e1-b66b-c5c20401aab7
+        fstype: auto
+        opts: nosuid,nodev,nofail,x-gvfs-show
+        state: mounted
+        dump: 0
+        passno: 0
+
+    - name: mount archive partition
+      mount:
+        path: /home/skodo/archive
+        src: /dev/disk/by-uuid/f4265ed6-02b7-4871-844e-c81a551daeaa
+        fstype: auto
+        opts: nosuid,nodev,nofail,x-gvfs-show
+        state: mounted
+        dump: 0
+        passno: 0
+
+    - name: mount virtual-machines partition
+      mount:
+        path: /home/skodo/virtual-machines
+        src: /dev/disk/by-uuid/a1878aff-8fff-4605-a778-92ff50ea1f80
+        fstype: auto
+        opts: nosuid,nodev,nofail,x-gvfs-show
+        state: mounted
+        dump: 0
+        passno: 0
+  tags: desktop
+  when: ("mean-machine" in ansible_hostname)
