@@ -8,30 +8,10 @@
       ignore_errors: true # sometimes fails due to 'unkown reason'
       tags: always
 
-    - name: add brave repo and install
-      block:
-        - name: get brave key, save in /usr/share/keyrings for newer apt deb syntax
-          ansible.builtin.get_url:
-            url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
-            dest: /usr/share/keyrings/brave-browser-archive-keyring.gpg
-            mode: "0666"
-
-        - name: add brave apt repository
-          ansible.builtin.apt_repository:
-            repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"
-            state: present
-            filename: brave-browser-release
-            update_cache: yes
-            mode: "0644"
-            validate_certs: yes
-
-        - name: install brave browser
-          ansible.builtin.apt:
-            state: present
-            name: brave-browser
-          ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
+    - name: add brave browser
+      ansible.builtin.include_tasks:
+        file: brave.yml
       tags: gui
-      when: ansible_architecture == "x86_64"
 
     - name: install vesktop.deb package
       ansible.builtin.apt:
@@ -128,6 +108,7 @@
           - keepassxc
           - gimp
           - texstudio
+          - kdeconnect
       tags: gui
 
     - name: install common gui applications (22.04 only)
