@@ -25,5 +25,7 @@
             chdir: /usr/local/fw-fanctrl
       when: fw_fanctrl_git_status.changed
   become: true
-  tags: framework
-  when: ansible_distribution_version == "24.04"
+  tags: laptop
+  when:
+    - ansible_distribution_version == "24.04"
+    - ansible_hostname == "framework"

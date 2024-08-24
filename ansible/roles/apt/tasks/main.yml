@@ -153,8 +153,8 @@
           - open-vm-tools-desktop
           - spice-vdagent
           - spice-webdavd
-      tags: vm
-      when: ("gui" is in ansible_run_tags)
+      tags: gui
+      when: ("vm" is in ansible_hostname)
 
     - name: add element repo and install
       block:

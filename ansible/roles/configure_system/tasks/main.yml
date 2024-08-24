@@ -62,7 +62,7 @@
   vars:
     user: "MyNameIs-13"
     repo: "fw-fanctrl"
-  tags: framework
+  tags: laptop
 
 - name: add noise-suppression-for-voice
   ansible.builtin.include_tasks:

@@ -96,15 +96,6 @@ else
         sudo rm -r "/${REPO_NAME}"
 
         tags="gui,home"
-        if [[ "${HOST_NAME}" == *"vm"* ]]; then
-            tags+=",vm"
-        fi
-        if [[ "${HOST_NAME}" == *"framework"* ]]; then
-            tags+=",framework"
-        fi
-        if [[ "${HOST_NAME}" == *"fw"* ]]; then
-            tags+=",framework"
-        fi
         if command -v dmidecode &> /dev/null; then
             chassis_type=$(sudo dmidecode -s chassis-type)
             case "${chassis_type}" in
