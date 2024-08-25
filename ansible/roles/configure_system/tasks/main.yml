@@ -76,3 +76,56 @@
   ansible.builtin.include_tasks:
     file: mount-drives.yml
   tags: always
+
+- name: mount mean-machine drives
+  ansible.builtin.include_tasks:
+    file: mount-drives.yml
+  tags: always
+
+- name: remove /root/.bashrc if it isn't a symlink, then create symlink
+  block:
+    - name: check if /root/.bashrc is a symlink
+      stat:
+        path: /root/.bashrc
+        follow: false
+      register: root_bashrc
+
+    - name: remove /root/.bashrc if it isn't a symlink
+      file:
+        path: /root/.bashrc
+        state: absent
+      when:
+        - root_bashrc.stat.exists
+        - not root_bashrc.stat.islnk
+
+    - name: create a symbolic link to {{ main_user }}'s .bashrc
+      ansible.builtin.file:
+        src: /home/{{ main_user }}/.bashrc
+        dest: /root/.bashrc
+        state: link
+  become: true
+  tags: always
+
+- name: remove /root/.vimrc if it isn't a symlink, then create symlink
+  block:
+    - name: check if /root/.vimrc is a symlink
+      stat:
+        path: /root/.vimrc
+        follow: false
+      register: root_vimrc
+
+    - name: remove /root/.vimrc if it isn't a symlink
+      file:
+        path: /root/.vimrc
+        state: absent
+      when:
+        - root_vimrc.stat.exists
+        - not root_vimrc.stat.islnk
+
+    - name: create a symbolic link to {{ main_user }}'s .vimrc
+      ansible.builtin.file:
+        src: /home/{{ main_user }}/.vimrc
+        dest: /root/.vimrc
+        state: link
+  become: true
+  tags: always
