@@ -156,31 +156,6 @@
       tags: gui
       when: ("vm" is in ansible_hostname)
 
-    - name: add element repo and install
-      block:
-        - name: get element key, save in /usr/share/keyrings for newer apt deb syntax
-          ansible.builtin.get_url:
-            url: https://packages.element.io/debian/element-io-archive-keyring.gpg
-            dest: /usr/share/keyrings/element-io-archive-keyring.gpg
-            mode: "0666"
-
-        - name: add element apt repository
-          ansible.builtin.apt_repository:
-            repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/element-io-archive-keyring.gpg] https://packages.element.io/debian/ default main"
-            state: present
-            filename: element-io
-            update_cache: yes
-            mode: "0644"
-            validate_certs: yes
-
-        - name: install element
-          ansible.builtin.apt:
-            state: present
-            name: element-desktop
-          ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
-      tags: home
-      when: ("gui" is in ansible_run_tags)
-
     - name: update all packages to their latest version
       ansible.builtin.apt:
         name: "*"
