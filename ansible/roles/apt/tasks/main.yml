@@ -162,6 +162,15 @@
         state: latest
       tags: always
 
+    - name: List installed and updated packages
+      shell: grep -E "^$(date +%Y-%m-%d).+ (install|upgrade) " /var/log/dpkg.log |cut -d " " -f 3-5
+      register: updated_packages
+      tags: always
+
+    - name: Show Output
+      debug: msg="{{ updated_packages.stdout_lines }}"
+      tags: always
+
     - name: remove dependencies that are no longer required and purge their configuration files
       ansible.builtin.apt:
         autoremove: true

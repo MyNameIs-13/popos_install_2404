@@ -10,16 +10,43 @@ GIT_PATH="/home/${USER}/documents/scm/${REPO_NAME}"
 SSID="Martin Router King"    # Replace with your WiFi SSID
 ENCRYPTED_FILE="${SCRIPT_HOME}/src/wifi_password.gpg"
 
-while getopts u:h:d:p flag
+function helptext() {
+cat << EOF
+Usage: $(basename "$0") [-u username] [-n hostname] [-d diskname] [-p password] [-h]
+
+Options:
+-u    Specify the username. (Optional)
+-n    Specify the hostname. (Optional)
+-d    Specify the diskname. (Optional)
+-p    Specify the password. (Optional)
+-h    Show this help message and exit.
+
+Examples:
+$(basename "$0") -u john_doe -n johns_machine -d sda -p p@assword
+$(basename "$0") -u admin
+
+Description:
+This script will install Pop!_OS from the live environment
+and then restart to configure the system with ansible
+and the user environment with chezmoi
+
+Omitted arguments are entered interactively
+EOF
+}
+
+while getopts "u:n:d:p:h" flag
 do
     case "${flag}" in
         u) user_name_arg=${OPTARG};;
-        h) host_name_arg=${OPTARG};;
+        n) host_name_arg=${OPTARG};;
         d) disk_name_arg=${OPTARG};;
         p) password_arg=${OPTARG};;
+        h )
+            helptext
+            exit 0;;
         ?)
-        echo "Usage: $(basename $0) [-u] username [-h] hostname [-d] diskname [-p] password"
-        exit 1;;
+            helptext
+            exit 1;;
     esac
 done
 
