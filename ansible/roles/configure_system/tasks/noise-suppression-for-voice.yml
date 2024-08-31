@@ -56,6 +56,9 @@
         dest: "/usr/local/noise-suppression-for-voice"
         remote_src: yes
       register: nsfv_download
+      until: "nsfv_download is not failed"
+      retries: 3
+      delay: 10
 
     - name: add VERSION file
       ansible.builtin.copy:

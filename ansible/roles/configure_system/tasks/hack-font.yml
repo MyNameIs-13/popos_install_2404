@@ -56,6 +56,9 @@
         dest: "/usr/local/share/fonts/hack-nerd-font"
         remote_src: yes
       register: hack_download
+      until: "hack_download is not failed"
+      retries: 3
+      delay: 10
 
     - name: add VERSION file
       ansible.builtin.copy:
