@@ -67,6 +67,7 @@
           - libsecret-tools
           - libsecret-1-dev
           - libsecret-1-0
+          - git-credential-oauth
           - software-properties-common
           - plocate
           - golang-go
@@ -80,14 +81,6 @@
       args:
         chdir: /usr/share/doc/git/contrib/credential/libsecret
       tags: always
-
-    - name: install common command line tools and libs (24.04)
-      ansible.builtin.apt:
-        state: present
-        pkg:
-          - git-credential-oauth
-      tags: always
-      when: ansible_distribution_version == "24.04"
 
     - name: install common command line tools and libs
       ansible.builtin.apt:
@@ -132,18 +125,6 @@
           - kdeconnect
       tags: gui
 
-    - name: install home specific command line tools and libs
-      ansible.builtin.apt:
-        state: present
-        pkg:
-          - gamemode
-          - mangohud
-          - mangoapp
-      tags: home
-      when:
-        - ("gui" is in ansible_run_tags)
-        - ansible_distribution_version == "24.04"
-
     - name: install home specific gui applications
       ansible.builtin.apt:
         state: present
@@ -153,6 +134,9 @@
           - conky-all
           - nextcloud-desktop
           - virt-manager
+          - gamemode
+          - mangohud
+          - mangoapp
       tags: home
       when: ("gui" is in ansible_run_tags)
 
@@ -193,10 +177,9 @@
         autoclean: true
       tags: always
 
-    - name: run the equivalent of "apt-get autoclean"
+    - name: run the equivalent of "apt-get clean"
       ansible.builtin.apt:
         clean: true
       tags: always
-      when: ansible_distribution_version == "24.04"
   become: true
   when: ansible_os_family == "Debian"
