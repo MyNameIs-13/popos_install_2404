@@ -28,21 +28,6 @@
     file: autopowerprofile.yml
   tags: always
 
-- name: upgrade recovery partition
-  block:
-    - name: "upgrade recovery partition : check the current day"
-      ansible.builtin.shell: "echo $(($(date '+%d')%7))"
-      register: current_day
-
-    - name: "upgrade recovery partition : execute upgrade"
-      ansible.builtin.command: pop-upgrade recovery upgrade from-release
-      ignore_errors: "{{ ansible_check_mode }}"
-      when: current_day.stdout | int == 1
-  tags: always
-  when:
-    - ansible_distribution == "Pop!_OS"
-    - ansible_distribution_version == "22.04"
-
 - name: add arrpc
   ansible.builtin.include_tasks:
     file: arrpc.yml

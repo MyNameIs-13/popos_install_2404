@@ -27,11 +27,6 @@
       ansible.builtin.shell: "echo $(($(date '+%d')%7))"
       register: current_day
       tags: always
-    - debug: msg="{{ current_day.stdout }}"
-      tags: always
-      when:
-        - current_day.stdout | int == 1
-        - ansible_distribution_version == "22.04"
     - command: /usr/bin/false
       register: result
       retries: 3

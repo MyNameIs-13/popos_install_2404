@@ -64,7 +64,6 @@ chmod +x install.sh
 - disk encryption forwarding for keyring decryption
 - define default applications for file extensions
 - `pop-upgrade recovery upgrade from-release` equivalent (recovery partition upgrade does not yet exist)
-- adapt ansible to work with other systems (raspi and SteamOS)
 
 Reason for a todo is one of the following:
 

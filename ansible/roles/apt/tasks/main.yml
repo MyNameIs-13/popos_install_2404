@@ -125,16 +125,6 @@
           - kdeconnect
       tags: gui
 
-    - name: install common gui applications (22.04 only)
-      ansible.builtin.apt:
-        state: present
-        pkg:
-          - flameshot
-          - evolution
-          - evolution-ews
-      tags: gui
-      when: ansible_distribution_version == "22.04"
-
     - name: install home specific command line tools and libs
       ansible.builtin.apt:
         state: present
