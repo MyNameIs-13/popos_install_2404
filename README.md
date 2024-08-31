@@ -58,6 +58,8 @@ chmod +x install.sh
 
 ## TODO
 
+- check all 'downloads' and add retries
+- add retry/error handling in install script for ansible
 - hibernation button in shutdown menu
 - disk encryption forwarding for keyring decryption
 - define default applications for file extensions

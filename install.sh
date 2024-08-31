@@ -123,19 +123,25 @@ else
         sudo rm -r "/${REPO_NAME}"
 
         tags="gui,home"
-        if command -v dmidecode &> /dev/null; then
-            chassis_type=$(sudo dmidecode -s chassis-type)
-            case "${chassis_type}" in
-                "Notebook" | "Portable" | "Laptop")
-                    tags+=",laptop"
-                    ;;
-                "Desktop" | "Tower" | "Mini Tower" | "Desktop or Tower")
-                    tags+=",desktop"
-                    ;;
-                *)
-                    echo "Unknown chassis type: ${chassis_type}"
-                    ;;
-            esac
+        if [[ "${HOSTNAME}" == "mean-machine" ]]; then
+            tags+=",desktop"
+        elif [[ "${HOSTNAME}" == "framework" ]]; then
+            tags+=",laptop"
+        else
+            if command -v dmidecode &> /dev/null; then
+                chassis_type=$(sudo dmidecode -s chassis-type)
+                case "${chassis_type}" in
+                    "Notebook" | "Portable" | "Laptop")
+                        tags+=",laptop"
+                        ;;
+                    "Desktop" | "Tower" | "Mini Tower" | "Desktop or Tower")
+                        tags+=",desktop"
+                        ;;
+                    *)
+                        echo "Unknown chassis type: ${chassis_type}"
+                        ;;
+                esac
+            fi
         fi
         inventory="${GIT_PATH}/ansible/localhost"
         # TODO: add error handling in case ansible-playbook stops

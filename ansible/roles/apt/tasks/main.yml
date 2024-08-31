@@ -16,6 +16,11 @@
     - name: install vesktop.deb package
       ansible.builtin.apt:
         deb: https://vencord.dev/download/vesktop/amd64/deb
+      register: vesktop_download
+      until: "vesktop_download is not failed"
+      retries: 3
+      delay: 10
+      ignore_errors: true
       tags: gui
       when: ansible_architecture == "x86_64"
 

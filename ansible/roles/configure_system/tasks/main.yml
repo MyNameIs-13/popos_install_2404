@@ -102,6 +102,7 @@
       ansible.builtin.file:
         src: /home/{{ main_user }}/.bashrc
         dest: /root/.bashrc
+        force: true
         state: link
   become: true
   tags: always
@@ -126,6 +127,7 @@
       ansible.builtin.file:
         src: /home/{{ main_user }}/.vimrc
         dest: /root/.vimrc
+        force: true
         state: link
   become: true
   tags: always
