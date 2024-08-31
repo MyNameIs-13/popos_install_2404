@@ -65,6 +65,7 @@
           - libsdl2-2.0-0
           - libsdl2-image-2.0-0
           - libsecret-tools
+          - libsecret-1-dev
           - software-properties-common
           - plocate
           - golang-go
