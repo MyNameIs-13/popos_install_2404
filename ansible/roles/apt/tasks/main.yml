@@ -75,6 +75,12 @@
           - npm
       tags: always
 
+    - name: make git-credential-libsecret
+      ansible.builtin.command: make
+      args:
+        chdir: /usr/share/doc/git/contrib/credential/libsecret
+      tags: always
+
     - name: install common command line tools and libs (24.04)
       ansible.builtin.apt:
         state: present
