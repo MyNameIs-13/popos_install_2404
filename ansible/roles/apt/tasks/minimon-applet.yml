@@ -1,0 +1,100 @@
+---
+- name: rustdesk
+  block:
+    - name: scrape URL for latest version
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
+        return_content: true
+      register: minimon_latest
+
+    - name: split version out
+      ansible.builtin.set_fact:
+        minimon_latest_version: "{{ minimon_latest.json.tag_name | regex_replace('v') }}"
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    # - name: check installed minimon version
+    #   ansible.builtin.command: /usr/bin/rustdesk --version
+    #   register: minimon_installed_version_output
+    #   ignore_errors: true
+
+    # - name: save installed minimon version as a fact
+    #   ansible.builtin.set_fact:
+    #     minimon_installed_version: "{{ minimon_installed_version_output.stdout if minimon_installed_version_output.rc == 0 else 'not installed' }}"
+    #   ignore_errors: "{{ ansible_check_mode }}"
+    #   when: minimon_installed_version_output is defined
+
+    - name: check if /opt/minimon-applet/VERSION exists
+      ansible.builtin.stat:
+        path: /opt/minimon-applet/VERSION
+      register: minimon_VERSION_file
+      become: true
+
+    - name: set installed_version based on file existence
+      ansible.builtin.set_fact:
+        minimon_installed_version: "{{ lookup('file', '/opt/minimon-applet/VERSION') }}"
+      when: minimon_VERSION_file.stat.exists
+
+    - name: set installed_version to 'not installed' if file does not exist
+      ansible.builtin.set_fact:
+        minimon_installed_version: "not installed"
+      tags: gui
+      when: not minimon_VERSION_file.stat.exists
+
+    - name: display the minimon version
+      ansible.builtin.debug:
+        msg:
+          - "installed: {{ minimon_installed_version }}"
+          - "available: {{ minimon_latest_version }}"
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: when there is no VERSION or it's contents don't match, do these
+      block:
+        - name: remove old installer
+          ansible.builtin.file:
+            path: /opt/minimon-applet
+            state: absent
+
+        - name: creates the folder
+          ansible.builtin.file:
+            path: /opt/minimon-applet
+            state: directory
+
+        - name: Download minimon
+          ansible.builtin.unarchive:
+            src: https://github.com/{{ user }}/{{ repo }}/releases/download/v{{ minimon_latest_version }}/cosmic-applet-minimon_{{ minimon_latest_version }}_amd64.zip
+            dest: /opt/minimon-applet
+            remote_src: yes
+          ignore_errors: true
+          register: minimon_download
+          until: "minimon_download is not failed"
+          retries: 3
+          delay: 10
+
+        - name: find the minimon directory with version number
+          ansible.builtin.find:
+            paths: /opt/minimon-applet/cosmic-applet-minimon_{{ minimon_latest_version }}_amd64/
+            patterns: "POP_OS-*24.04*"
+            file_type: directory
+          register: minimon_found_directories
+
+        - name: install minimon
+          ansible.builtin.apt:
+            deb: "{{ minimon_found_directories.files[0].path }}/cosmic-applet-minimon_{{ minimon_latest_version }}_amd64.deb"
+          ignore_errors: "{{ ansible_check_mode }}"
+          register: minimon_installed
+          when:
+            - ansible_os_family == "Debian"
+            - ansible_architecture == "x86_64"
+            - minimon_download is not failed
+
+        - name: add VERSION file
+          ansible.builtin.copy:
+            content: "{{ minimon_latest_version }}"
+            dest: /opt/minimon-applet/VERSION
+          ignore_errors: true
+          when:
+            - minimon_installed.changed
+      become: True
+      when: minimon_installed_version != minimon_latest_version
+  tags: laptop,vm
+  when: ansible_os_family == "Debian"

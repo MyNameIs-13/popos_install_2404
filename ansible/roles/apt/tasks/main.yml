@@ -13,6 +13,14 @@
         file: brave.yml
       tags: gui
 
+    - name: add Minimon COSMIC Applet
+      ansible.builtin.include_tasks:
+        file: minimon-applet.yml
+      vars:
+        user: "Hyperchaotic"
+        repo: "minimon-applet"
+      tags: laptop,vm
+
     - name: install vesktop.deb package
       ansible.builtin.apt:
         deb: https://vencord.dev/download/vesktop/amd64/deb
