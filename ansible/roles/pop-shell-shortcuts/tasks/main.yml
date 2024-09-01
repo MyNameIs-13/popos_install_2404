@@ -1,0 +1,50 @@
+---
+- name: shell-shortcuts
+  block:
+    - name: install required packages
+      ansible.builtin.apt:
+        name:
+          - git
+          - cargo
+          - rustc
+          - libgtk-3-dev
+        state: present
+
+    - name: clone the shell-shortcuts repository
+      ansible.builtin.git:
+        repo: https://github.com/MyNameIs-13/shell-shortcuts.git
+        dest: /usr/local/shell-shortcuts
+      register: shell_shortcuts_git_status
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: when git repo changed
+      block:
+        - name: check if '/usr/local' is already in git safe.directory
+          ansible.builtin.command: "git config --global --get-all safe.directory"
+          register: shell_shortcuts_git_safe_directory
+          ignore_errors: true # If there are no safe.directory entries, this will avoid failing the playbook.
+
+        - name: add '/usr/local' to git safe.directory if not present
+          ansible.builtin.command: "git config --global --add safe.directory '/usr/local'"
+          when: "'/usr/local' not in shell_shortcuts_git_safe_directory.stdout_lines"
+
+        - name: remove old builds and build attempts
+          ansible.builtin.file:
+            state: absent
+            dest: /usr/local/shell-shortcuts/target
+
+        - name: build project
+          ansible.builtin.command: make
+          args:
+            chdir: /usr/local/shell-shortcuts
+
+        - name: install project
+          ansible.builtin.command: make install
+          args:
+            chdir: /usr/local/shell-shortcuts
+      when: shell_shortcuts_git_status.changed
+  become: true
+  tags: gui
+  when:
+    - ansible_distribution_version == "24.04"
+    - ansible_os_family == "Debian"

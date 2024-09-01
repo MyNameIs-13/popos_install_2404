@@ -74,6 +74,9 @@
           - libxkbcommon-dev
           - p7zip
           - npm
+          - cargo
+          - rustc
+          - libgtk-3-dev
       tags: always
 
     - name: make git-credential-libsecret

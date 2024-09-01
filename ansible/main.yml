@@ -13,3 +13,4 @@
     - role: rustdesk
     - role: pycharm
     - role: gamescope
+    - role: pop-shell-shortcuts

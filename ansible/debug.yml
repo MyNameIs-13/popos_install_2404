@@ -34,15 +34,15 @@
       until: result is not failed
       ignore_errors: true
       tags: always
-  roles:
-    # roles:
-    #   - role: apt
-    #   - role: configure_system
-    #   - role: ohmyposh
-    #   - role: chezmoi
-    #   - role: joplin
-    #   - role: keyd
-    #   - role: zed-editor
-    #   - role: rustdesk
-    #   - role: pycharm
-    #   - role: gamescope
+  # roles:
+  #   - role: apt
+  #   - role: configure_system
+  #   - role: ohmyposh
+  #   - role: chezmoi
+  #   - role: joplin
+  #   - role: keyd
+  #   - role: zed-editor
+  #   - role: rustdesk
+  #   - role: pycharm
+  #   - role: gamescope
+  #   - role: pop-shell-shortcuts
