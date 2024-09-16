@@ -1,48 +1,48 @@
 ---
-- name: add syncthing repo, install and start
+- name: Add syncthing repo, install and start
+  become: true
+  tags: home
   block:
-    - name: get syncthing key, save in /usr/share/keyrings for newer apt deb syntax
+    - name: Get syncthing key, save in /usr/share/keyrings for newer apt deb syntax
       ansible.builtin.get_url:
         url: https://syncthing.net/release-key.gpg
         dest: /usr/share/keyrings/syncthing-archive-keyring.gpg
-        mode: "0666"
+        mode: "0644"
 
-    - name: add syncthing apt repository
+    - name: Add syncthing apt repository
       ansible.builtin.apt_repository:
         repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable"
         state: present
         filename: syncthing
-        update_cache: yes
+        update_cache: true
         mode: "0644"
-        validate_certs: yes
+        validate_certs: true
       when: ansible_architecture == "x86_64"
 
-    - name: add syncthing apt repository
+    - name: Add syncthing apt repository
       ansible.builtin.apt_repository:
         repo: "deb [arch=arm64 signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable"
         state: present
         filename: syncthing
-        update_cache: yes
+        update_cache: true
         mode: "0644"
-        validate_certs: yes
+        validate_certs: true
       when: ansible_architecture == "aarch64"
 
-    - name: install syncthing
+    - name: Install syncthing
       ansible.builtin.apt:
         state: present
         name: syncthing
       ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
 
-    - name: add --no-default-folder
+    - name: Add --no-default-folder
       ansible.builtin.lineinfile:
         path: /usr/lib/systemd/system/syncthing@.service
         regexp: "^ExecStart=/usr/bin/syncthing serve --no-browser --no-restart --logflags=0"
         line: ExecStart=/usr/bin/syncthing serve --no-browser --no-restart --no-default-folder --logflags=0
 
-    - name: enable syncthing
+    - name: Enable syncthing
       ansible.builtin.systemd:
         name: syncthing@{{ main_user }}.service
         state: "started"
         enabled: true
-  become: true
-  tags: home

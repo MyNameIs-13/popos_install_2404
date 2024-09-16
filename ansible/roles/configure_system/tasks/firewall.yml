@@ -1,5 +1,5 @@
 ---
-- name: "firewall : enable UFW"
+- name: Firewall | enable UFW
   community.general.ufw:
     state: enabled
   become: true
@@ -10,7 +10,7 @@
 # address has attempted to initiate 6 or more connections in the last
 # 30 seconds. See  http://www.debian-administration.org/articles/187
 # for details. Typical usage is:
-- name: "firewall : limit ssh"
+- name: Firewall | limit ssh
   community.general.ufw:
     rule: limit
     port: ssh
@@ -18,7 +18,7 @@
   become: true
   tags: always
 
-- name: "firewall : allow port range 1714:1764 (kde connect)"
+- name: Firewall | allow port range 1714:1764 (kde connect)
   community.general.ufw:
     rule: allow
     port: 1714:1764
@@ -29,7 +29,7 @@
   become: true
   tags: home
 
-- name: "firewall : allow port range 21027 (syncthing)"
+- name: Firewall | allow port range 21027 (syncthing)
   community.general.ufw:
     rule: allow
     port: "21027"
@@ -37,7 +37,7 @@
   become: true
   tags: home
 
-- name: "firewall : allow port range 22000 (syncthing)"
+- name: Firewall | allow port range 22000 (syncthing)
   community.general.ufw:
     rule: allow
     port: "22000"
@@ -48,7 +48,7 @@
   become: true
   tags: home
 
-- name: "firewall : rustdesk web console"
+- name: Firewall | rustdesk web console
   community.general.ufw:
     rule: allow
     port: "21114"

@@ -1,37 +1,37 @@
 ---
-- name: scrape URL for latest version
+- name: Scrape URL for latest version
   ansible.builtin.uri:
     url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
     return_content: true
   register: latest
   tags: always
 
-- name: split version out
+- name: Split version out
   ansible.builtin.set_fact:
     latest_version: "{{ latest.json.tag_name }}"
   ignore_errors: "{{ ansible_check_mode }}"
   tags: always
 
-- name: check if /opt/zed.app/VERSION exists
+- name: Check if /opt/zed.app/VERSION exists
   ansible.builtin.stat:
     path: /opt/zed.app/VERSION
-  register: VERSION_file
+  register: zed_version_file
   become: true
   tags: always
 
-- name: set installed_version based on file existence
+- name: Set installed_version based on file existence
   ansible.builtin.set_fact:
     installed_version: "{{ lookup('file', '/opt/zed.app/VERSION') }}"
-  when: VERSION_file.stat.exists
+  when: zed_version_file.stat.exists
   tags: always
 
-- name: set installed_version to 'not installed' if file does not exist
+- name: Set installed_version to 'not installed' if file does not exist
   ansible.builtin.set_fact:
     installed_version: "not installed"
-  when: not VERSION_file.stat.exists
+  when: not zed_version_file.stat.exists
   tags: always
 
-- name: display the zed-editor version
+- name: Display the zed-editor version
   ansible.builtin.debug:
     msg:
       - "installed: {{ installed_version }}"
@@ -39,18 +39,23 @@
   ignore_errors: "{{ ansible_check_mode }}"
   tags: always
 
-- name: when there is no VERSION or it's contents don't match, do these
+- name: When there is no VERSION or it's contents don't match, do these
+  ignore_errors: "{{ ansible_check_mode }}"
+  become: true
+  tags: always
+  when: installed_version != latest_version
   block:
-    - name: delete previous version
+    - name: Delete previous version
       ansible.builtin.file:
         path: /opt/zed.app
         state: absent
 
-    - name: download tarball
+    - name: Download tarball
       ansible.builtin.get_url:
         url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ latest_version }}/zed-linux-x86_64.tar.gz
         dest: /tmp/zed-editor.tar.gz
         timeout: 1200
+        mode: "0644"
       register: zed_download
       until: "zed_download is not failed"
       retries: 3
@@ -58,11 +63,12 @@
       ignore_errors: true
       when: ansible_architecture == "x86_64"
 
-    - name: download tarball
+    - name: Download tarball
       ansible.builtin.get_url:
         url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ latest_version }}/zed-linux-aarch64.tar.gz
         dest: /tmp/zed-editor.tar.gz
         timeout: 1200
+        mode: "0644"
       register: zed_download
       until: "zed_download is not failed"
       retries: 3
@@ -70,23 +76,23 @@
       ignore_errors: true
       when: ansible_architecture == "aarch64"
 
-    - name: extract tarball
+    - name: Extract tarball
       ansible.builtin.unarchive:
         src: /tmp/zed-editor.tar.gz
         dest: /opt/
         mode: "0755"
       when: zed_download is not failed
 
-    - name: remove /tmp/zed-editor.tar.gz after unarchiving
+    - name: Remove /tmp/zed-editor.tar.gz after unarchiving
       ansible.builtin.file:
         path: /tmp/zed-editor.tar.gz
         state: absent
-      ignore_errors: true
 
-    - name: add VERSION file
+    - name: Add VERSION file
       ansible.builtin.copy:
         content: "{{ latest_version }}"
         dest: /opt/zed.app/VERSION
+        mode: "0644"
       when: zed_download is not failed
 
     - name: Create a symbolic link
@@ -96,7 +102,7 @@
         state: link
       when: zed_download is not failed
 
-    - name: create desktop file
+    - name: Create desktop file
       ansible.builtin.copy:
         dest: /usr/share/applications/dev.zed.Zed.desktop
         content: |
@@ -118,15 +124,12 @@
           [Desktop Action NewWorkspace]
           Exec=/opt/zed.app/libexec/zed-editor --new %U
           Name=Open a new workspace
+        mode: "0644"
       when: zed_download is not failed
 
-    #https://github.com/zed-industries/zed/issues/15629#issuecomment-2277029842
-    - name: workaround for pop!_os nvidia stuff
+    # https://github.com/zed-industries/zed/issues/15629#issuecomment-2277029842
+    - name: Workaround for pop!_os nvidia stuff
       ansible.builtin.lineinfile:
         path: /etc/prime-discrete
         regexp: "^on"
         line: "off"
-  ignore_errors: "{{ ansible_check_mode }}"
-  become: true
-  tags: always
-  when: installed_version != latest_version

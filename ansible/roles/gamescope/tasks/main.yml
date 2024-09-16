@@ -1,105 +1,69 @@
 ---
-- name: gamescope
-  block:
-    - name: install required packages
-      ansible.builtin.apt:
-        name:
-          - git
-          - libbenchmark1.8.3
-          - libdisplay-info1
-          - libevdev-dev
-          - libgav1-1
-          - libgudev-1.0-dev
-          - libmtdev-dev
-          - libseat1
-          - libstb0
-          - libwacom-dev
-          - libxcb-ewmh2
-          - libxcb-shape0-dev
-          - libxcb-xfixes0-dev
-          - libxmu-headers
-          - libyuv0
-          - libx11-xcb-dev
-          - libxres-dev
-          - libxmu-dev
-          - libseat-dev
-          - libinput-dev
-          - libxcb-composite0-dev
-          - libxcb-ewmh-dev
-          - libxcb-icccm4-dev
-          - libxcb-res0-dev
-          - libcap-dev
-          - wayland-protocols
-          - libvulkan-dev
-          - libwayland-dev
-          - libx11-dev
-          - cmake
-          - pkg-config
-          - meson
-          - libxdamage-dev
-          - libxcomposite-dev
-          - libxcursor-dev
-          - libxxf86vm-dev
-          - libxtst-dev
-          - libxkbcommon-dev
-          - libdrm-dev
-          - libpixman-1-dev
-          - libdecor-0-dev
-          - glslang-tools
-          - libbenchmark-dev
-          - libsdl2-dev
-          - libglm-dev
-          - libeis-dev
-          - libavif-dev
-          - hwdata
-        state: present
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - git
+      - libbenchmark1.8.3
+      - libdisplay-info1
+      - libevdev-dev
+      - libgav1-1
+      - libgudev-1.0-dev
+      - libmtdev-dev
+      - libseat1
+      - libstb0
+      - libwacom-dev
+      - libxcb-ewmh2
+      - libxcb-shape0-dev
+      - libxcb-xfixes0-dev
+      - libxmu-headers
+      - libyuv0
+      - libx11-xcb-dev
+      - libxres-dev
+      - libxmu-dev
+      - libseat-dev
+      - libinput-dev
+      - libxcb-composite0-dev
+      - libxcb-ewmh-dev
+      - libxcb-icccm4-dev
+      - libxcb-res0-dev
+      - libcap-dev
+      - wayland-protocols
+      - libvulkan-dev
+      - libwayland-dev
+      - libx11-dev
+      - cmake
+      - pkg-config
+      - meson
+      - libxdamage-dev
+      - libxcomposite-dev
+      - libxcursor-dev
+      - libxxf86vm-dev
+      - libxtst-dev
+      - libxkbcommon-dev
+      - libdrm-dev
+      - libpixman-1-dev
+      - libdecor-0-dev
+      - glslang-tools
+      - libbenchmark-dev
+      - libsdl2-dev
+      - libglm-dev
+      - libeis-dev
+      - libavif-dev
+      - hwdata
+    state: present
+  become: true
+  tags: home
+  when:
+    - ansible_distribution_version == "24.04"
+    - ansible_os_family == "Debian"
 
-    - name: clone the gamescope repository
-      ansible.builtin.git:
-        repo: https://github.com/ValveSoftware/gamescope.git
-        dest: /usr/local/gamescope
-        single_branch: true
-        version: "3.14.24"
-      register: gamescope_git_status
-      ignore_errors: "{{ ansible_check_mode }}"
-
-    - name: when git repo changed
-      block:
-        - name: check if '/usr/local' is already in git safe.directory
-          ansible.builtin.command: "git config --global --get-all safe.directory"
-          register: gamescope_git_safe_directory
-          ignore_errors: true # If there are no safe.directory entries, this will avoid failing the playbook.
-
-        - name: add '/usr/local' to git safe.directory if not present
-          ansible.builtin.command: "git config --global --add safe.directory '/usr/local'"
-          when: "'/usr/local' not in gamescope_git_safe_directory.stdout_lines"
-
-        - name: remove old builds and build attempts
-          ansible.builtin.file:
-            state: absent
-            dest: /usr/local/gamescope/build
-
-        - name: run meson to configure the build directory
-          ansible.builtin.command: meson setup build/
-          args:
-            chdir: /usr/local/gamescope
-
-        - name: compile the project with ninja
-          ansible.builtin.command: ninja -C build/
-          args:
-            chdir: /usr/local/gamescope
-
-        - name: install the compiled project
-          ansible.builtin.command: meson install -C build/ --skip-subprojects
-          args:
-            chdir: /usr/local/gamescope
-
-        # removed due to: https://github.com/ValveSoftware/gamescope/issues/107
-        # - name: setcap
-        #   ansible.builtin.command: setcap 'CAP_SYS_NICE=eip' /usr/local/bin/gamescope
-        #   args:
-        #     chdir: /usr/local/gamescope
-      when: gamescope_git_status.changed
+- name: Clone the gamescope repository  # noqa: latest[git] I want to have the latest
+  ansible.builtin.git:
+    repo: https://github.com/ValveSoftware/gamescope.git
+    dest: /usr/local/gamescope
+    single_branch: true
+    version: "3.14.24"
+  notify: Update Gamescope
   become: true
   tags: home
   when:

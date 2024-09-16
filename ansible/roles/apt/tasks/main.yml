@@ -1,19 +1,21 @@
 ---
-- name: apt
+- name: Apt
+  become: true
+  when: ansible_os_family == "Debian"
   block:
-    - name: run the equivalent of "apt-get update"
+    - name: Run the equivalent of "apt-get update"
       ansible.builtin.apt:
-        update_cache: yes
+        update_cache: true
         cache_valid_time: 3600
-      ignore_errors: true # sometimes fails due to 'unkown reason'
+      failed_when: false # sometimes fails due to 'unkown reason'
       tags: always
 
-    - name: add brave browser
+    - name: Add brave browser
       ansible.builtin.include_tasks:
         file: brave.yml
       tags: gui
 
-    - name: add Minimon COSMIC Applet
+    - name: Add Minimon COSMIC Applet
       ansible.builtin.include_tasks:
         file: minimon-applet.yml
       vars:
@@ -21,26 +23,36 @@
         repo: "minimon-applet"
       tags: laptop,vm
 
-    - name: install vesktop.deb package
+    - name: Add Gamemode COSMIC Applet
+      ansible.builtin.include_tasks:
+        file: gamemode-applet.yml
+      vars:
+        user: "D-Brox"
+        repo: "cosmic-ext-applet-gamemode-status"
+      tags: gui
+
+    - name: Install vesktop.deb package
       ansible.builtin.apt:
         deb: https://vencord.dev/download/vesktop/amd64/deb
       register: vesktop_download
       until: "vesktop_download is not failed"
       retries: 3
       delay: 10
-      ignore_errors: true
+      failed_when: false
+      notify: List installed and updated apt packages
       tags: gui
       when: ansible_architecture == "x86_64"
 
-    - name: remove a list of packages
+    - name: Remove a list of packages
       ansible.builtin.apt:
         state: absent
         pkg:
           - firefox
           - totem
+      notify: List installed and updated apt packages
       tags: always
 
-    - name: install common command line tools and libs
+    - name: Install common command line tools and libs
       ansible.builtin.apt:
         state: present
         pkg:
@@ -64,9 +76,6 @@
           - python3-psutil
           - libsdl2-2.0-0
           - libsdl2-image-2.0-0
-          - libsecret-tools
-          - libsecret-1-dev
-          - libsecret-1-0
           - git-credential-oauth
           - software-properties-common
           - plocate
@@ -77,15 +86,24 @@
           - cargo
           - rustc
           - libgtk-3-dev
+          - just
+          - ansible-lint
+      notify: List installed and updated apt packages
       tags: always
 
-    - name: make git-credential-libsecret
-      ansible.builtin.command: make
-      args:
-        chdir: /usr/share/doc/git/contrib/credential/libsecret
+    - name: Install libsecret command line tools and libs
+      ansible.builtin.apt:
+        state: present
+        pkg:
+          - libsecret-tools
+          - libsecret-1-dev
+          - libsecret-1-0
+      notify:
+        - Make git-credential-libsecret
+        - List installed and updated apt packages
       tags: always
 
-    - name: install common command line tools and libs
+    - name: Install common command line tools and libs
       ansible.builtin.apt:
         state: present
         pkg:
@@ -110,9 +128,10 @@
           - texlive-plain-generic
           - texlive-science
           - texlive-xetex
+      notify: List installed and updated apt packages
       tags: gui
 
-    - name: install common gui applications
+    - name: Install common gui applications
       ansible.builtin.apt:
         state: present
         pkg:
@@ -126,9 +145,10 @@
           - gimp
           - texstudio
           - kdeconnect
+      notify: List installed and updated apt packages
       tags: gui
 
-    - name: install home specific gui applications
+    - name: Install home specific gui applications
       ansible.builtin.apt:
         state: present
         pkg:
@@ -140,10 +160,11 @@
           - gamemode
           - mangohud
           - mangoapp
+      notify: List installed and updated apt packages
       tags: home
       when: ("gui" is in ansible_run_tags)
 
-    - name: install virtual machine tools
+    - name: Install virtual machine tools
       ansible.builtin.apt:
         state: present
         pkg:
@@ -151,38 +172,29 @@
           - open-vm-tools-desktop
           - spice-vdagent
           - spice-webdavd
+      notify: List installed and updated apt packages
       tags: gui
       when: ("vm" is in ansible_hostname)
 
-    - name: update all packages to their latest version
+    - name: Update all packages to their latest version  # noqa: package-latest
       ansible.builtin.apt:
         name: "*"
         state: latest
+      notify: List installed and updated apt packages
       tags: always
 
-    - name: List installed and updated packages
-      shell: grep -E "^$(date +%Y-%m-%d).+ (install|upgrade) " /var/log/dpkg.log |cut -d " " -f 3-5
-      register: updated_packages
-      tags: always
-
-    - name: Show Output
-      debug: msg="{{ updated_packages.stdout_lines }}"
-      tags: always
-
-    - name: remove dependencies that are no longer required and purge their configuration files
+    - name: Remove dependencies that are no longer required and purge their configuration files
       ansible.builtin.apt:
         autoremove: true
         purge: true
       tags: always
 
-    - name: run the equivalent of "apt-get autoclean"
+    - name: Run the equivalent of "apt-get autoclean"
       ansible.builtin.apt:
         autoclean: true
       tags: always
 
-    - name: run the equivalent of "apt-get clean"
+    - name: Run the equivalent of "apt-get clean"
       ansible.builtin.apt:
         clean: true
       tags: always
-  become: true
-  when: ansible_os_family == "Debian"

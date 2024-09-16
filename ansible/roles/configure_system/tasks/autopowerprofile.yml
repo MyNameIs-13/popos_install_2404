@@ -1,5 +1,5 @@
 ---
-- name: create battery.target systemd unit file
+- name: Create battery.target systemd unit file
   ansible.builtin.copy:
     dest: /etc/systemd/system/battery.target
     content: |
@@ -8,10 +8,11 @@
       DefaultDependencies=no
       StopWhenUnneeded=yes
     mode: "0644"
-  become: True
+  notify: Reload systemd daemon to recognize new services
+  become: true
   tags: laptop
 
-- name: add power profile battery service
+- name: Add power profile battery service
   ansible.builtin.copy:
     dest: /etc/systemd/system/powerprofile_battery.service
     content: |
@@ -26,10 +27,11 @@
       [Install]
       WantedBy=battery.target
     mode: "0644"
-  become: True
+  notify: Reload systemd daemon to recognize new services
+  become: true
   tags: laptop
 
-- name: create ac.target systemd unit file
+- name: Create ac.target systemd unit file
   ansible.builtin.copy:
     dest: /etc/systemd/system/ac.target
     content: |
@@ -38,10 +40,11 @@
       DefaultDependencies=no
       StopWhenUnneeded=yes
     mode: "0644"
-  become: True
+  notify: Reload systemd daemon to recognize new services
+  become: true
   tags: laptop
 
-- name: add power profile balanced service
+- name: Add power profile balanced service
   ansible.builtin.copy:
     dest: /etc/systemd/system/powerprofile_balanced.service
     content: |
@@ -56,36 +59,32 @@
       [Install]
       WantedBy=ac.target
     mode: "0644"
-  become: True
+  notify: Reload systemd daemon to recognize new services
+  become: true
   tags: laptop
 
-- name: add udev rules for power targets
+- name: Add udev rules for power targets
   ansible.builtin.copy:
     dest: /etc/udev/rules.d/99-powertargets.rules
     content: |
       SUBSYSTEM=="power_supply", ATTR{online}=="0", RUN+="/usr/bin/systemctl start battery.target"
       SUBSYSTEM=="power_supply", ATTR{online}=="1", RUN+="/usr/bin/systemctl start ac.target"
     mode: "0644"
-  become: True
+  become: true
   tags: laptop
 
-- name: reload systemd daemon to recognize new services
-  ansible.builtin.command: systemctl daemon-reload
-  become: True
-  tags: laptop
-
-- name: enable powerprofile_battery service
+- name: Enable powerprofile_battery service
   ansible.builtin.systemd:
     name: powerprofile_battery.service
     enabled: true
-    masked: no
-  become: True
+    masked: false
+  become: true
   tags: laptop
 
-- name: enable powerprofile_balanced service
+- name: Enable powerprofile_balanced service
   ansible.builtin.systemd:
     name: powerprofile_balanced.service
     enabled: true
-    masked: no
-  become: True
+    masked: false
+  become: true
   tags: laptop

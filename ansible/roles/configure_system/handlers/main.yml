@@ -1,0 +1,30 @@
+---
+- name: Add '/usr/local' to git safe.directory
+  community.general.git_config:
+    name: safe.directory
+    scope: system
+    value: /usr/local
+  become: true
+  tags: always
+
+- name: Update arrpc
+  ansible.builtin.command: npm install
+  args:
+    chdir: /usr/local/arrpc
+  changed_when: true
+  become: true
+  tags: always
+
+- name: Reload systemd daemon to recognize new services
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  become: true
+  tags: always
+
+- name: Update framework fancontrol
+  ansible.builtin.command: ./install.sh
+  args:
+    chdir: /usr/local/fw-fanctrl
+  changed_when: true
+  become: true
+  tags: always

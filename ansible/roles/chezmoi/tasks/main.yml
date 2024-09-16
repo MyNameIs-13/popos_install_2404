@@ -1,30 +1,32 @@
 ---
-- name: scrape URL for latest version
+- name: Scrape URL for latest version
   ansible.builtin.uri:
     url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
     return_content: true
   register: chezmoi_latest
   tags: always
 
-- name: split version out
+- name: Split version out
   ansible.builtin.set_fact:
     chezmoi_latest_version: "{{ chezmoi_latest.json.tag_name | regex_replace('v') }}"
   tags: always
 
-- name: check installed chezmoi version
+- name: Check installed chezmoi version
   ansible.builtin.command: /usr/bin/chezmoi --version
   register: chezmoi_installed_version_output
-  ignore_errors: true
+  changed_when: true
+  failed_when: false
   tags: always
 
-- name: save installed chezmoi version as a fact
+- name: Save installed chezmoi version as a fact
   ansible.builtin.set_fact:
-    chezmoi_installed_version: "{{ chezmoi_installed_version_output.stdout | regex_search('v([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | first if chezmoi_installed_version_output.rc == 0 else 'not installed' }}"
+    chezmoi_installed_version: "{{ chezmoi_installed_version_output.stdout | regex_search('v([0-9]+\\.[0-9]+\\.[0-9]+)', '\\1') | \
+                                first if chezmoi_installed_version_output.rc == 0 else 'not installed' }}"
   ignore_errors: "{{ ansible_check_mode }}"
   tags: always
   when: chezmoi_installed_version_output is defined
 
-- name: display the chezmoi version
+- name: Display the chezmoi version
   ansible.builtin.debug:
     msg:
       - "installed: {{ chezmoi_installed_version }}"
@@ -32,22 +34,22 @@
   ignore_errors: "{{ ansible_check_mode }}"
   tags: always
 
-- name: install chezmoi
+- name: Install chezmoi
   ansible.builtin.apt:
     deb: https://github.com/{{ user }}/{{ repo }}/releases/download/v{{ chezmoi_latest_version }}/chezmoi_{{ chezmoi_latest_version }}_linux_amd64.deb
   ignore_errors: "{{ ansible_check_mode }}"
-  become: True
+  become: true
   tags: always
   when:
     - chezmoi_installed_version != chezmoi_latest_version
     - ansible_os_family == "Debian"
     - ansible_architecture == "x86_64"
 
-- name: install chezmoi
+- name: Install chezmoi
   ansible.builtin.apt:
     deb: https://github.com/{{ user }}/{{ repo }}/releases/download/v{{ chezmoi_latest_version }}/chezmoi_{{ chezmoi_latest_version }}_linux_arm64.deb
   ignore_errors: "{{ ansible_check_mode }}"
-  become: True
+  become: true
   tags: always
   when:
     - chezmoi_installed_version != chezmoi_latest_version

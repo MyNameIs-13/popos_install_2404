@@ -1,0 +1,40 @@
+---
+- name: Update Gamemode Applet
+  become: true
+  tags: always
+  block:
+    - name: Add '/usr/local' to git safe.directory
+      community.general.git_config:
+        name: safe.directory
+        scope: system
+        value: /usr/local
+
+    - name: Remove old builds and build attempts
+      ansible.builtin.file:
+        state: absent
+        dest: /usr/local/gamemode_applet/target
+
+    # - name: Build project (to create Cargo.toml)
+    #   ansible.builtin.command: just build-deb
+    #   args:
+    #     chdir: /usr/local/gamemode_applet
+    #   changed_when: true
+    #   failed_when: false
+
+    - name: Bug workaround https://github.com/pop-os/libcosmic/issues/596
+      ansible.builtin.command: cargo update --precise c751217 cosmic-text
+      args:
+        chdir: /usr/local/gamemode_applet
+      changed_when: true
+
+    - name: Build project
+      ansible.builtin.command: just build-deb
+      args:
+        chdir: /usr/local/gamemode_applet
+      changed_when: true
+
+    - name: Install project
+      ansible.builtin.command: just install-deb
+      args:
+        chdir: /usr/local/gamemode_applet
+      changed_when: true

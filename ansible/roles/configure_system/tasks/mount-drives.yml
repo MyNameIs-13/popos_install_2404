@@ -1,8 +1,11 @@
 ---
-- name: mount mean-machine drives
+- name: Mount mean-machine drives
+  become: true
+  tags: desktop
+  when: ("mean-machine" in ansible_hostname)
   block:
-    - name: mount games disk
-      mount:
+    - name: Mount games disk
+      ansible.posix.mount:
         path: /home/skodo/games
         src: /dev/disk/by-label/Games
         fstype: auto
@@ -11,8 +14,8 @@
         dump: 0
         passno: 0
 
-    - name: mount archive partition
-      mount:
+    - name: Mount archive partition
+      ansible.posix.mount:
         path: /home/skodo/archive
         src: /dev/mapper/archive
         fstype: auto
@@ -21,8 +24,8 @@
         dump: 0
         passno: 0
 
-    - name: mount virtual-machines partition
-      mount:
+    - name: Mount virtual-machines partition
+      ansible.posix.mount:
         path: /home/skodo/virtual-machines
         src: /dev/mapper/virtual-machines
         fstype: auto
@@ -30,6 +33,3 @@
         state: mounted
         dump: 0
         passno: 0
-  become: true
-  tags: desktop
-  when: ("mean-machine" in ansible_hostname)

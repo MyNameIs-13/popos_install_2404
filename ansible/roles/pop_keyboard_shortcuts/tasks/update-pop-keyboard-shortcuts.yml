@@ -1,0 +1,32 @@
+---
+- name: Update Pop Keyboard Shortcuts
+  become: true
+  tags: always
+  block:
+    - name: Add '/usr/local' to git safe.directory
+      community.general.git_config:
+        name: safe.directory
+        scope: system
+        value: /usr/local
+
+    - name: Remove old builds and build attempts
+      ansible.builtin.file:
+        state: absent
+        dest: /usr/local/shell-shortcuts/target
+
+    - name: Remove old builds and build attempts
+      ansible.builtin.file:
+        state: absent
+        dest: /usr/local/bin/pop-shell-shortcuts
+
+    - name: Build project
+      ansible.builtin.command: just build-release
+      args:
+        chdir: /usr/local/shell-shortcuts
+      changed_when: true
+
+    - name: Install project
+      ansible.builtin.command: just install
+      args:
+        chdir: /usr/local/shell-shortcuts
+      changed_when: true

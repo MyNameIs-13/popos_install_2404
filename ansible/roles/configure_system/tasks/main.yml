@@ -1,10 +1,18 @@
 ---
-- name: set timezone to Europe/Brussels
-  timezone:
+- name: Set timezone to Europe/Brussels
+  community.general.timezone:
     name: Europe/Brussels
   tags: always
 
-- name: add Hack nerdfont
+- name: Install requirements
+  ansible.builtin.apt:
+    name:
+      - git
+      - npm
+    state: present
+  tags: always
+
+- name: Add Hack nerdfont
   ansible.builtin.include_tasks:
     file: hack-font.yml
   vars:
@@ -12,44 +20,54 @@
     repo: "nerd-fonts"
   tags: always
 
-- name: configure firewall rules
+- name: Configure firewall rules
   ansible.builtin.include_tasks:
     file: firewall.yml
   tags: always
 
-- name: configure hibernation
+- name: Configure hibernation
   ansible.builtin.include_tasks:
     file: hibernation.yml
   tags: always
   when: ("gui" is in ansible_run_tags)
 
-- name: configure automatic switch batterty and ac profile
+- name: Configure automatic switch batterty and ac profile
   ansible.builtin.include_tasks:
     file: autopowerprofile.yml
   tags: always
 
-- name: add arrpc
-  ansible.builtin.include_tasks:
-    file: arrpc.yml
-  vars:
-    user: "OpenAsar"
-    repo: "arrpc"
-  tags: home
+- name: Clone the arrpc repository  # noqa: latest[git] I want to have the latest
+  ansible.builtin.git:
+    repo: https://github.com//OpenAsar/arrpc.git
+    dest: /usr/local/arrpc
+    version: main
+  notify:
+    - Add '/usr/local' to git safe.directory
+    - Update arrpc
+  become: true
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags: gui
 
-- name: add syncthing
+- name: Add syncthing
   ansible.builtin.include_tasks:
     file: syncthing.yml
   tags: home
 
-- name: add fw-fanctrl
-  ansible.builtin.include_tasks:
-    file: fw-fanctrl.yml
-  vars:
-    user: "MyNameIs-13"
-    repo: "fw-fanctrl"
+- name: Clone the fw-fanctrl repository  # noqa: latest[git] I want to have the latest
+  ansible.builtin.git:
+    repo: https://github.com/MyNameIs-13/fw-fanctrl.git
+    dest: /usr/local/fw-fanctrl
+    version: main
+  notify:
+    - Add '/usr/local' to git safe.directory
+    - Update framework fancontrol
+  become: true
   tags: laptop
+  when:
+    - ansible_distribution_version == "24.04"
+    - ansible_hostname == "framework"
 
-- name: add noise-suppression-for-voice
+- name: Add noise-suppression-for-voice
   ansible.builtin.include_tasks:
     file: noise-suppression-for-voice.yml
   vars:
@@ -57,62 +75,62 @@
     repo: "noise-suppression-for-voice"
   tags: home
 
-- name: mount mean-machine drives
+- name: Mount mean-machine drives
   ansible.builtin.include_tasks:
     file: mount-drives.yml
   tags: always
 
-- name: mount mean-machine drives
+- name: Mount mean-machine drives
   ansible.builtin.include_tasks:
     file: mount-drives.yml
   tags: always
 
-- name: remove /root/.bashrc if it isn't a symlink, then create symlink
+- name: Remove /root/.bashrc if it isn't a symlink, then create symlink
+  become: true
+  tags: always
   block:
-    - name: check if /root/.bashrc is a symlink
-      stat:
+    - name: Check if /root/.bashrc is a symlink
+      ansible.builtin.stat:
         path: /root/.bashrc
         follow: false
       register: root_bashrc
 
-    - name: remove /root/.bashrc if it isn't a symlink
-      file:
+    - name: Remove /root/.bashrc if it isn't a symlink
+      ansible.builtin.file:
         path: /root/.bashrc
         state: absent
       when:
         - root_bashrc.stat.exists
         - not root_bashrc.stat.islnk
 
-    - name: create a symbolic link to {{ main_user }}'s .bashrc
+    - name: Create a symbolic link to .bashrc in /home/{{ main_user }}
       ansible.builtin.file:
         src: /home/{{ main_user }}/.bashrc
         dest: /root/.bashrc
         force: true
         state: link
+
+- name: Remove /root/.vimrc if it isn't a symlink, then create symlink
   become: true
   tags: always
-
-- name: remove /root/.vimrc if it isn't a symlink, then create symlink
   block:
-    - name: check if /root/.vimrc is a symlink
-      stat:
+    - name: Check if /root/.vimrc is a symlink
+      ansible.builtin.stat:
         path: /root/.vimrc
         follow: false
       register: root_vimrc
 
-    - name: remove /root/.vimrc if it isn't a symlink
-      file:
+    - name: Remove /root/.vimrc if it isn't a symlink
+      ansible.builtin.file:
         path: /root/.vimrc
         state: absent
       when:
         - root_vimrc.stat.exists
         - not root_vimrc.stat.islnk
 
-    - name: create a symbolic link to {{ main_user }}'s .vimrc
+    - name: Create a symbolic link to .vimrc in /home/{{ main_user }}
       ansible.builtin.file:
         src: /home/{{ main_user }}/.vimrc
         dest: /root/.vimrc
         force: true
         state: link
-  become: true
-  tags: always

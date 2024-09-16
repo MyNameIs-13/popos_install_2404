@@ -1,0 +1,4 @@
+---
+- name: Update Pop Keyboard Shortcuts
+  ansible.builtin.include_tasks: roles/pop_keyboard_shortcuts/tasks/update-pop-keyboard-shortcuts.yml
+  tags: always

@@ -1,36 +1,36 @@
 ---
-- name: scrape URL for latest version
+- name: Scrape URL for latest version
   ansible.builtin.uri:
     url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
     return_content: true
   register: hack_latest
   tags: always
 
-- name: split version out
+- name: Split version out
   ansible.builtin.set_fact:
     hack_latest_version: "{{ hack_latest.json.tag_name }}"
   tags: always
 
-- name: check if /usr/local/share/fonts/hack-nerd-font/VERSION exists
+- name: Check if /usr/local/share/fonts/hack-nerd-font/VERSION exists
   ansible.builtin.stat:
     path: /usr/local/share/fonts/hack-nerd-font/VERSION
-  register: hack_VERSION_file
+  register: hack_version_file
   become: true
   tags: always
 
-- name: set installed_version based on file existence
+- name: Set installed_version based on file existence
   ansible.builtin.set_fact:
     hack_installed_version: "{{ lookup('file', '/usr/local/share/fonts/hack-nerd-font/VERSION') }}"
   tags: always
-  when: hack_VERSION_file.stat.exists
+  when: hack_version_file.stat.exists
 
-- name: set installed_version to 'not installed' if file does not exist
+- name: Set installed_version to 'not installed' if file does not exist
   ansible.builtin.set_fact:
     hack_installed_version: "not installed"
   tags: always
-  when: not hack_VERSION_file.stat.exists
+  when: not hack_version_file.stat.exists
 
-- name: display the hack version
+- name: Display the hack version
   ansible.builtin.debug:
     msg:
       - "installed: {{ hack_installed_version }}"
@@ -38,34 +38,36 @@
   ignore_errors: "{{ ansible_check_mode }}"
   tags: always
 
-- name: when there is no VERSION or it's contents don't match, do these
+- name: When there is no VERSION or it's contents don't match, do these
+  ignore_errors: "{{ ansible_check_mode }}"
+  become: true
+  tags: always
+  when: hack_installed_version != hack_latest_version
   block:
-    - name: delete previous version
+    - name: Delete previous version
       ansible.builtin.file:
         name: /usr/local/share/fonts/hack-nerd-font
         state: absent
 
-    - name: create empty folder
+    - name: Create empty folder
       ansible.builtin.file:
         path: /usr/local/share/fonts/hack-nerd-font
         state: directory
+        mode: '0666'
 
     - name: Download Hack
       ansible.builtin.unarchive:
         src: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ hack_latest_version }}/Hack.zip
         dest: "/usr/local/share/fonts/hack-nerd-font"
-        remote_src: yes
+        remote_src: true
       register: hack_download
       until: "hack_download is not failed"
       retries: 3
       delay: 10
 
-    - name: add VERSION file
+    - name: Add VERSION file
       ansible.builtin.copy:
         content: "{{ hack_latest_version }}"
         dest: /usr/local/share/fonts/hack-nerd-font/VERSION
+        mode: '0666'
       when: hack_download is not failed
-  ignore_errors: "{{ ansible_check_mode }}"
-  become: true
-  tags: always
-  when: hack_installed_version != hack_latest_version

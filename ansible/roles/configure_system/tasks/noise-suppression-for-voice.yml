@@ -1,36 +1,36 @@
 ---
-- name: scrape URL for latest version
+- name: Scrape URL for latest version
   ansible.builtin.uri:
     url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
     return_content: true
   register: nsfv_latest
   tags: home
 
-- name: split version out
+- name: Split version out
   ansible.builtin.set_fact:
     nsfv_latest_version: "{{ nsfv_latest.json.tag_name }}"
   tags: home
 
-- name: check if /usr/local/noise-suppression-for-voice/VERSION exists
+- name: Check if /usr/local/noise-suppression-for-voice/VERSION exists
   ansible.builtin.stat:
     path: /usr/local/noise-suppression-for-voice/VERSION
-  register: nsfv_VERSION_file
+  register: nsfv_version_file
   become: true
   tags: home
 
-- name: set installed_version based on file existence
+- name: Set installed_version based on file existence
   ansible.builtin.set_fact:
     nsfv_installed_version: "{{ lookup('file', '/usr/local/noise-suppression-for-voice/VERSION') }}"
   tags: home
-  when: nsfv_VERSION_file.stat.exists
+  when: nsfv_version_file.stat.exists
 
-- name: set installed_version to 'not installed' if file does not exist
+- name: Set installed_version to 'not installed' if file does not exist
   ansible.builtin.set_fact:
     nsfv_installed_version: "not installed"
   tags: home
-  when: not nsfv_VERSION_file.stat.exists
+  when: not nsfv_version_file.stat.exists
 
-- name: display the nsfv version
+- name: Display the nsfv version
   ansible.builtin.debug:
     msg:
       - "installed: {{ nsfv_installed_version }}"
@@ -38,34 +38,36 @@
   ignore_errors: "{{ ansible_check_mode }}"
   tags: home
 
-- name: when there is no VERSION or it's contents don't match, do these
+- name: When there is no VERSION or it's contents don't match, do these
+  ignore_errors: "{{ ansible_check_mode }}"
+  become: true
+  tags: home
+  when: nsfv_installed_version != nsfv_latest_version
   block:
-    - name: delete previous version
+    - name: Delete previous version
       ansible.builtin.file:
         name: /usr/local/noise-suppression-for-voice
         state: absent
 
-    - name: create empty folder
+    - name: Create empty folder
       ansible.builtin.file:
         path: /usr/local/noise-suppression-for-voice
         state: directory
+        mode: "0644"
 
     - name: Download nsfv
       ansible.builtin.unarchive:
         src: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ nsfv_latest_version }}/linux-rnnoise.zip
         dest: "/usr/local/noise-suppression-for-voice"
-        remote_src: yes
+        remote_src: true
       register: nsfv_download
       until: "nsfv_download is not failed"
       retries: 3
       delay: 10
 
-    - name: add VERSION file
+    - name: Add VERSION file
       ansible.builtin.copy:
         content: "{{ nsfv_latest_version }}"
         dest: /usr/local/noise-suppression-for-voice/VERSION
+        mode: "0644"
       when: nsfv_download is not failed
-  ignore_errors: "{{ ansible_check_mode }}"
-  become: true
-  tags: home
-  when: nsfv_installed_version != nsfv_latest_version

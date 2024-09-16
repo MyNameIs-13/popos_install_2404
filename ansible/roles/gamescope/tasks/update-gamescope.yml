@@ -1,0 +1,36 @@
+---
+- name: Update Gamescope
+  become: true
+  tags: home
+  when:
+    - ansible_distribution_version == "24.04"
+    - ansible_os_family == "Debian"
+  block:
+    - name: Add '/usr/local' to git safe.directory
+      community.general.git_config:
+        name: safe.directory
+        scope: system
+        value: /usr/local
+
+    - name: Remove old builds and build attempts
+      ansible.builtin.file:
+        state: absent
+        dest: /usr/local/gamescope/build
+
+    - name: Run meson to configure the build directory
+      ansible.builtin.command: meson setup build/
+      args:
+        chdir: /usr/local/gamescope
+      changed_when: true
+
+    - name: Compile the project with ninja
+      ansible.builtin.command: ninja -C build/
+      args:
+        chdir: /usr/local/gamescope
+      changed_when: true
+
+    - name: Install the compiled project
+      ansible.builtin.command: meson install -C build/ --skip-subprojects
+      args:
+        chdir: /usr/local/gamescope
+      changed_when: true

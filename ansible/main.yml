@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: Install
+  hosts: all
   vars:
     main_user: "skodo"
   roles:
@@ -9,8 +10,8 @@
     - role: chezmoi
     - role: joplin
     - role: keyd
-    - role: zed-editor
+    - role: zed_editor
     - role: rustdesk
     - role: pycharm
     - role: gamescope
-    - role: pop-shell-shortcuts
+    - role: pop_keyboard_shortcuts

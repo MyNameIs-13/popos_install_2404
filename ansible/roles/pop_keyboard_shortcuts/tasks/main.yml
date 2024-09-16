@@ -1,0 +1,26 @@
+---
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - git
+      - cargo
+      - rustc
+      - just
+    state: present
+  become: true
+  tags: gui
+  when:
+    - ansible_distribution_version == "24.04"
+    - ansible_os_family == "Debian"
+
+- name: Clone the shell-shortcuts repository  # noqa: latest[git] I want to have the latest
+  ansible.builtin.git:
+    repo: https://github.com/MyNameIs-13/shell-shortcuts.git
+    dest: /usr/local/shell-shortcuts
+    version: master
+  notify: Update Pop Keyboard Shortcuts
+  become: true
+  tags: gui
+  when:
+    - ansible_distribution_version == "24.04"
+    - ansible_os_family == "Debian"

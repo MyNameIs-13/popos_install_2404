@@ -1,0 +1,27 @@
+---
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - git
+      - cargo
+      - rustc
+      - just
+    state: present
+  become: true
+  tags: gui
+  when:
+    - ansible_distribution_version == "24.04"
+    - ansible_os_family == "Debian"
+
+- name: Clone the gamemode repository  # noqa: latest[git] I want to have the latest
+  ansible.builtin.git:
+    repo: https://github.com/{{ user }}/{{ repo }}.git
+    dest: /usr/local/gamemode_applet
+    version: main
+  become: true
+  notify: Update Gamemode Applet
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags: gui
+  when:
+    - ansible_distribution_version == "24.04"
+    - ansible_os_family == "Debian"

@@ -1,30 +1,31 @@
 ---
-- name: scrape URL for latest version
+- name: Scrape URL for latest version
   ansible.builtin.uri:
     url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
     return_content: true
   register: ohmyposh_latest
   tags: always
 
-- name: split version out
+- name: Split version out
   ansible.builtin.set_fact:
     ohmyposh_latest_version: "{{ ohmyposh_latest.json.tag_name }}"
   tags: always
 
-- name: check installed oh-my-posh version
+- name: Check installed oh-my-posh version
   ansible.builtin.command: /usr/local/bin/oh-my-posh --version
   register: ohmyposh_installed_version_output
-  ignore_errors: true
+  ignore_errors: true  # when not installed, error is expected
+  changed_when: true
   tags: always
 
-- name: save installed oh-my-posh version as a fact
+- name: Save installed oh-my-posh version as a fact
   ansible.builtin.set_fact:
     ohmyposh_installed_version: "{{ 'v' + ohmyposh_installed_version_output.stdout if ohmyposh_installed_version_output.rc == 0 else 'not installed' }}"
   ignore_errors: "{{ ansible_check_mode }}"
   tags: always
   when: ohmyposh_installed_version_output is defined
 
-- name: display the oh-my-posh version
+- name: Display the oh-my-posh version
   ansible.builtin.debug:
     msg:
       - "installed: {{ ohmyposh_installed_version }}"
@@ -32,7 +33,7 @@
   ignore_errors: "{{ ansible_check_mode }}"
   tags: always
 
-- name: download Binary
+- name: Download Binary
   ansible.builtin.get_url:
     url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ ohmyposh_latest_version }}/posh-linux-amd64
     dest: "/usr/local/bin/oh-my-posh"
@@ -44,7 +45,7 @@
     - ohmyposh_installed_version != ohmyposh_latest_version
     - ansible_architecture == "x86_64"
 
-- name: download Binary
+- name: Download Binary
   ansible.builtin.get_url:
     url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ ohmyposh_latest_version }}/posh-linux-arm64
     dest: "/usr/local/bin/oh-my-posh"

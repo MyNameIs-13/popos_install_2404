@@ -1,76 +1,31 @@
 ---
-- name: keyd
+- name: Keyd
+  tags: always
+  become: true
+  when: ansible_distribution_version == "24.04"
   block:
-    - name: creates /etc/keyd
+    - name: Creates /etc/keyd
       ansible.builtin.file:
         path: /etc/keyd
         state: directory
+        mode: "0644"
 
-    - name: create keyd config file
+    - name: Create keyd config file
       ansible.builtin.template:
         src: keyd_mapping.j2
         dest: /etc/keyd/default.conf
+        mode: "0644"
 
-    # - name: ensure compose:menu
-    #   ansible.builtin.lineinfile:
-    #     path: /etc/vconsole.conf
-    #     regexp: "^XKBOPTIONS="
-    #     line: XKBOPTIONS=,compose:menu
-    #     mode: "0644"
-
-    - name: install required packages
+    - name: Install required packages
       ansible.builtin.apt:
         name:
           - cmake
           - make
         state: present
 
-    - name: clone the keyd repository
+    - name: Clone the keyd repository  # noqa: latest[git] I want to have the latest
       ansible.builtin.git:
         repo: https://github.com/rvaiya/keyd
         dest: /usr/local/keyd
-      register: keyd_git_status
+      notify: Update keyd
       ignore_errors: "{{ ansible_check_mode }}"
-
-    - name: when git repo changed
-      block:
-        - name: check if '/usr/local' is already in git safe.directory
-          ansible.builtin.command: "git config --global --get-all safe.directory"
-          register: keyd_git_safe_directory
-          ignore_errors: true # If there are no safe.directory entries, this will avoid failing the playbook.
-
-        - name: add '/usr/local' to git safe.directory if not present
-          ansible.builtin.command: "git config --global --add safe.directory '/usr/local'"
-          when: "'/usr/local' not in keyd_git_safe_directory.stdout_lines"
-
-        - name: git clean
-          ansible.builtin.command: git clean -f
-          args:
-            chdir: /usr/local/keyd
-
-        - name: make
-          ansible.builtin.command: make
-          args:
-            chdir: /usr/local/keyd
-
-        - name: make install
-          ansible.builtin.command: make install
-          args:
-            chdir: /usr/local/keyd
-
-        - name: enable keyd
-          ansible.builtin.systemd:
-            name: keyd
-            state: "started"
-            enabled: true
-
-        # BUG: module was rename but does not work yet in  2.10.8
-        # - name: enable keyd
-        #   ansible.builtin.systemd_service:
-        #     name: keyd
-        #     state: "started"
-        #     enabled: true
-      when: keyd_git_status.changed
-  tags: always
-  become: true
-  when: ansible_distribution_version == "24.04"

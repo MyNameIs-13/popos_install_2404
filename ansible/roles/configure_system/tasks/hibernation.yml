@@ -1,45 +1,50 @@
 ---
-- name: ensure HibernateDelaySec is set in sleep.conf
+- name: Ensure HibernateDelaySec is set in sleep.conf
   ansible.builtin.lineinfile:
     path: /etc/systemd/sleep.conf
     line: "HibernateDelaySec=900"
-    create: yes
+    create: true
+    mode: "0440"
   become: true
   tags: always
 
-- name: ensure AllowSuspendThenHibernate is set in sleep.conf
+- name: Ensure AllowSuspendThenHibernate is set in sleep.conf
   ansible.builtin.lineinfile:
     path: /etc/systemd/sleep.conf
     line: "AllowSuspendThenHibernate=yes"
-    create: yes
+    create: true
+    mode: "0440"
   become: true
   tags: always
 
-- name: ensure HandleLidSwitch is set in logind.conf
+- name: Ensure HandleLidSwitch is set in logind.conf
   ansible.builtin.lineinfile:
     path: /etc/systemd/logind.conf
     line: "HandleLidSwitch=hibernate"
-    create: yes
+    create: true
+    mode: "0440"
   become: true
   tags: laptop
 
-- name: ensure HandleSuspendKey is set in logind.conf
+- name: Ensure HandleSuspendKey is set in logind.conf
   ansible.builtin.lineinfile:
     path: /etc/systemd/logind.conf
     line: "HandleSuspendKey=suspend-then-hibernate"
-    create: yes
+    create: true
+    mode: "0440"
   become: true
   tags: always
 
-- name: create /etc/polkit-1/localauthority/10-vendor.d directory if it does not exist
-  file:
+- name: Create /etc/polkit-1/localauthority/10-vendor.d directory if it does not exist
+  ansible.builtin.file:
     path: /etc/polkit-1/localauthority/10-vendor.d
     state: directory
-  become: True
+    mode: "0440"
+  become: true
   tags: always
 
 # TODO: doesn't seem to work in cosmic
-- name: create com.ubuntu.pkla
+- name: Create com.ubuntu.pkla
   ansible.builtin.copy:
     dest: /etc/polkit-1/localauthority/10-vendor.d/com.ubuntu.pkla
     content: |
@@ -52,66 +57,67 @@
       Identity=unix-user:*
       Action=org.freedesktop.login1.hibernate;org.freedesktop.login1.handle-hibernate-key;org.freedesktop.login1;org.freedesktop.login1.hibernate-multiple-sessions;org.freedesktop.login1.hibernate-ignore-inhibit
       ResultActive=yes
-  become: True
+    mode: "0440"
+  become: true
   tags: always
 
-- name: ensure the user can suspend without password
+- name: Ensure the user can suspend without password
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/sleepstates
     line: "{{ main_user }} ALL=NOPASSWD: /bin/systemctl suspend"
-    create: yes
+    create: true
     mode: "0440"
   become: true
   tags: always
 
-- name: ensure the user can hibernate without password
+- name: Ensure the user can hibernate without password
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/sleepstates
     line: "{{ main_user }} ALL=NOPASSWD: /bin/systemctl hibernate"
-    create: yes
+    create: true
     mode: "0440"
   become: true
   tags: always
 
-- name: ensure the user can suspend-then-hibernate without password
+- name: Ensure the user can suspend-then-hibernate without password
   ansible.builtin.lineinfile:
     path: /etc/sudoers.d/sleepstates
     line: "{{ main_user }} ALL=NOPASSWD: /bin/systemctl suspend-then-hibernate"
-    create: yes
+    create: true
     mode: "0440"
   become: true
   tags: always
 
-- name: dconf requirement installation
+- name: Dconf requirement installation
   ansible.builtin.apt:
     state: present
     name: python3-psutil
   become: true
   tags: laptop
 
-- name: configure sleep-inactive-ac-type
-  ansible.builtin.dconf:
+- name: Configure sleep-inactive-ac-type
+  community.general.dconf:
     key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type"
     value: "'suspend'"
     state: present
   tags: laptop
 
-- name: configure sleep-inactive-ac-timeout
-  ansible.builtin.dconf:
+- name: Configure sleep-inactive-ac-timeout
+  community.general.dconf:
     key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-timeout"
     value: 7200
     state: present
   tags: laptop
 
-- name: configure sleep-inactive-battery-type
-  ansible.builtin.dconf:
+- name: Configure sleep-inactive-battery-type
+  community.general.dconf:
     key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-type"
     value: "'suspend-then-hibernate'"
     state: present
   tags: laptop
 
-- name: configure sleep-inactive-battery-timeout
-  ansible.builtin.dconf:
+- name: Configure sleep-inactive-battery-timeout
+  community.general.dconf:
     key: "/org/gnome/settings-daemon/plugins/power/sleep-inactive-battery-timeout"
     value: 900
     state: present

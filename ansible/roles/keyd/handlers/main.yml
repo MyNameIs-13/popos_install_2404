@@ -1,0 +1,4 @@
+---
+- name: Update keyd
+  ansible.builtin.include_tasks: roles/keyd/tasks/update-keyd.yml
+  tags: always

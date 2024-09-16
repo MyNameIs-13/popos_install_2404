@@ -1,38 +1,38 @@
 ---
 # based on : https://github.com/thisdwhitley/ansible-role-joplin/
-- name: scrape URL for latest version
+- name: Scrape URL for latest version
   ansible.builtin.uri:
     url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
     return_content: true
   register: joplin_latest
   tags: gui
 
-- name: split version out
+- name: Split version out
   ansible.builtin.set_fact:
     joplin_latest_version: "{{ joplin_latest.json.tag_name | regex_replace('v') }}"
   ignore_errors: "{{ ansible_check_mode }}"
   tags: gui
 
-- name: check if /opt/joplin/VERSION exists
+- name: Check if /opt/joplin/VERSION exists
   ansible.builtin.stat:
     path: /opt/joplin/VERSION
-  register: joplin_VERSION_file
+  register: joplin_version_file
   become: true
   tags: gui
 
-- name: set installed_version based on file existence
+- name: Set installed_version based on file existence
   ansible.builtin.set_fact:
     joplin_installed_version: "{{ lookup('file', '/opt/joplin/VERSION') }}"
   tags: gui
-  when: joplin_VERSION_file.stat.exists
+  when: joplin_version_file.stat.exists
 
-- name: set installed_version to 'not installed' if file does not exist
+- name: Set installed_version to 'not installed' if file does not exist
   ansible.builtin.set_fact:
     joplin_installed_version: "not installed"
   tags: gui
-  when: not joplin_VERSION_file.stat.exists
+  when: not joplin_version_file.stat.exists
 
-- name: display the joplin version
+- name: Display the joplin version
   ansible.builtin.debug:
     msg:
       - "installed: {{ joplin_installed_version }}"
@@ -40,9 +40,13 @@
   ignore_errors: "{{ ansible_check_mode }}"
   tags: gui
 
-- name: when there is no VERSION or it's contents don't match, do these
+- name: When there is no VERSION or it's contents don't match, do these
+  ignore_errors: "{{ ansible_check_mode }}"
+  become: true
+  tags: gui
+  when: joplin_installed_version != joplin_latest_version
   block:
-    - name: delete previous version
+    - name: Delete previous version
       ansible.builtin.file:
         name: "{{ item }}"
         state: absent
@@ -51,28 +55,31 @@
         - /usr/share/applications/joplin.desktop
         - /opt/joplin/VERSION
 
-    - name: download the latest appimage version
+    - name: Download the latest appimage version
       ansible.builtin.get_url:
         url: https://github.com/{{ user }}/{{ repo }}/releases/download/v{{ joplin_latest_version }}/Joplin-{{ joplin_latest_version }}.AppImage
         dest: /usr/local/bin/Joplin.AppImage
         mode: "0755"
 
-    - name: creates the folder where VERSION and icon will be stored
+    - name: Creates the folder where VERSION and icon will be stored
       ansible.builtin.file:
         path: /opt/joplin
         state: directory
+        mode: "0644"
 
-    - name: download the icon
+    - name: Download the icon
       ansible.builtin.get_url:
         url: https://joplinapp.org/images/Icon512.png
         dest: /opt/joplin/Icon512.png
+        mode: "0644"
 
-    - name: add VERSION file
+    - name: Add VERSION file
       ansible.builtin.copy:
         content: "{{ joplin_latest_version }}"
         dest: /opt/joplin/VERSION
+        mode: "0644"
 
-    - name: create desktop file
+    - name: Create desktop file
       ansible.builtin.copy:
         dest: /usr/share/applications/joplin.desktop
         content: |
@@ -88,7 +95,4 @@
           MimeType=x-scheme-handler/joplin;
           X-GNOME-SingleWindow=true
           SingleMainWindow=true
-  ignore_errors: "{{ ansible_check_mode }}"
-  become: true
-  tags: gui
-  when: joplin_installed_version != joplin_latest_version
+        mode: "0644"

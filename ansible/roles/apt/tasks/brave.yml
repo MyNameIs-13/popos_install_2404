@@ -1,54 +1,57 @@
 ---
-- name: add brave repo and install
+- name: Add brave repo and install
+  become: true
+  tags: gui
+  when: ansible_architecture == "x86_64"
   block:
-    - name: get brave key, save in /usr/share/keyrings for newer apt deb syntax
+    - name: Get brave key, save in /usr/share/keyrings for newer apt deb syntax
       ansible.builtin.get_url:
         url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
         dest: /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        mode: "0666"
+        mode: "0644"
 
-    - name: add brave apt repository
+    - name: Add brave apt repository
       ansible.builtin.apt_repository:
         repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"
         state: present
         filename: brave-browser-release
-        update_cache: yes
+        update_cache: true
         mode: "0644"
-        validate_certs: yes
+        validate_certs: true
 
-    - name: install brave browser
+    - name: Install brave browser
       ansible.builtin.apt:
         state: present
         name: brave-browser
       ignore_errors: "{{ ansible_check_mode }}" # --check cannot validate that the package is available as the repo is not yet added
 
-    - name: add initial_preferences
+    - name: Add initial_preferences
       ansible.builtin.template:
         src: brave-settings.j2
         dest: /opt/brave.com/brave/initial_preferences
+        mode: '666'
 
-    - name: add bookmarks
+    - name: Add bookmarks
       ansible.builtin.template:
         src: brave-bookmarks.html.j2
         dest: /opt/brave.com/brave/bookmarks.html
+        mode: '666'
 
-    - name: create extensions folder
+    - name: Create extensions folder
       ansible.builtin.file:
         path: /opt/brave.com/brave/extensions
         state: directory
+        mode: '666'
 
-    - name: add extensions
+    - name: Add extensions
       ansible.builtin.copy:
         dest: /opt/brave.com/brave/extensions/{{ item }}.json
         content: |
           {
             "external_update_url": "https://clients2.google.com/service/update2/crx"
           }
+        mode: '666'
       with_items:
         - "oboonakemofpalcgghocfoadofidjkkk" # keepassxc
         - "danncghahncanipdoajmakdbeaophenb" # auto-group-tabs
         - "fploionmjgeclbkemipmkogoaohcdbig" # page-load-time
-
-  become: true
-  tags: gui
-  when: ansible_architecture == "x86_64"

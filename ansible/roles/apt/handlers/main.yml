@@ -1,0 +1,34 @@
+---
+- name: Update Gamemode Applet
+  ansible.builtin.include_tasks: roles/apt/tasks/update-gamemode-applet.yml
+  tags: always
+
+- name: Make git-credential-libsecret
+  ansible.builtin.command: make
+  args:
+    chdir: /usr/share/doc/git/contrib/credential/libsecret
+  changed_when: true
+  become: true
+  tags: always
+
+- name: Add minimon version file
+  ansible.builtin.copy:
+    content: "{{ minimon_latest_version }}"
+    dest: /opt/minimon-applet/VERSION
+    mode: '0777'
+  become: true
+  tags: always
+
+- name: Gather updated packages  # noqa: risky-shell-pipe
+  ansible.builtin.shell: grep -E "^$(date +%Y-%m-%d).+ (install|upgrade) " /var/log/dpkg.log | cut -d " " -f 3-5
+  register: apt_updated_packages
+  changed_when: true
+  become: true
+  tags: always
+  listen: List installed and updated apt packages
+
+- name: Show updated packages
+  ansible.builtin.debug:
+    msg: "{{ apt_updated_packages.stdout_lines }}"
+  tags: always
+  listen: List installed and updated apt packages
