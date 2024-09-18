@@ -107,6 +107,14 @@ else
             sudo pam-auth-update --enable "fprintd"
         fi
 
+        systemctl --user stop gnome-gnome-keyring-daemon.socket
+        systemctl --user stop gnome-gnome-keyring-daemon.service
+        rm -r ~/.local/share/keyrings
+        mkdir -p ~/.local/share/keyrings
+        echo "${BOLD}Create 'Default keyring' without password and set as default keyring.${NORMAL}"
+        # FIXME: with COSMIC autounlock through luks key does not seem to work and default keyring is not created correctly
+        seahorse
+
         # Copy install script to drive
         sudo mkdir -p "${GIT_PATH}"
         sudo chown ${USER}:${USER} "${GIT_PATH}/.."
