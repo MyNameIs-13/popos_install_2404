@@ -1,6 +1,6 @@
 ---
 - name: Install
-  hosts: all
+  hosts: control_node
   vars:
     main_user: "skodo"
   roles:

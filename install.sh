@@ -143,7 +143,7 @@ else
                 esac
             fi
         fi
-        inventory="${GIT_PATH}/ansible/localhost"
+        inventory="${GIT_PATH}/ansible/hosts.yml"
         # TODO: add error handling in case ansible-playbook stops
         ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -T 60 -t "${tags}" -e main_user=${USER} --ask-become-pass
 
