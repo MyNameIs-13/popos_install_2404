@@ -3,6 +3,12 @@
   become: true
   when: ansible_os_family == "Debian"
   block:
+    - name: Add ansible repository into sources list
+      ansible.builtin.apt_repository:
+        repo: ppa:ansible/ansible
+        state: present
+      tags: always
+
     - name: Run the equivalent of "apt-get update"
       ansible.builtin.apt:
         update_cache: true
