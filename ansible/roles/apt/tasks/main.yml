@@ -8,6 +8,12 @@
         state: present
       tags: always
 
+    - name: Add quickemu repository into sources list
+      ansible.builtin.apt_repository:
+        repo: ppa:flexiondotorg/quickemu
+        state: present
+      tags: always
+
     - name: Run the equivalent of "apt-get update"
       ansible.builtin.apt:
         update_cache: true
@@ -133,6 +139,7 @@
           - texlive-plain-generic
           - texlive-science
           - texlive-xetex
+          - quickemu
       notify: List installed and updated apt packages
       tags: gui
 
@@ -150,6 +157,7 @@
           - gimp
           - texstudio
           - kdeconnect
+          - quickgui
       notify: List installed and updated apt packages
       tags: gui
 
