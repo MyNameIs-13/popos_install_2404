@@ -5,7 +5,7 @@
   block:
     - name: Mount games disk
       ansible.posix.mount:
-        path: /home/skodo/games
+        path: /home/{{ main_user }}/games
         src: /dev/disk/by-label/Games
         fstype: auto
         opts: nosuid,nodev,nofail,x-gvfs-show
@@ -15,7 +15,7 @@
 
     - name: Mount archive partition
       ansible.posix.mount:
-        path: /home/skodo/archive
+        path: /home/{{ main_user }}/archive
         src: /dev/mapper/archive
         fstype: auto
         opts: nosuid,nodev,nofail,x-gvfs-show
@@ -25,7 +25,7 @@
 
     - name: Mount virtual-machines partition
       ansible.posix.mount:
-        path: /home/skodo/virtual-machines
+        path: /home/{{ main_user }}/virtual-machines
         src: /dev/mapper/virtual-machines
         fstype: auto
         opts: nosuid,nodev,nofail,x-gvfs-show
