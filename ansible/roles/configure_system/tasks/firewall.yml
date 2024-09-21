@@ -2,7 +2,6 @@
 - name: Firewall | enable UFW
   community.general.ufw:
     state: enabled
-  become: true
   tags: always
 
 # ufw supports connection rate limiting, which is useful for protecting
@@ -15,7 +14,6 @@
     rule: limit
     port: ssh
     proto: tcp
-  become: true
   tags: always
 
 - name: Firewall | allow port range 1714:1764 (kde connect)
@@ -26,7 +24,6 @@
   with_items:
     - tcp
     - udp
-  become: true
   tags: home
 
 - name: Firewall | allow port range 21027 (syncthing)
@@ -34,7 +31,6 @@
     rule: allow
     port: "21027"
     proto: udp
-  become: true
   tags: home
 
 - name: Firewall | allow port range 22000 (syncthing)
@@ -45,7 +41,6 @@
   with_items:
     - tcp
     - udp
-  become: true
   tags: home
 
 - name: Firewall | rustdesk web console
@@ -53,5 +48,4 @@
     rule: allow
     port: "21114"
     proto: tcp
-  become: true
   tags: always

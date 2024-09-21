@@ -1,6 +1,5 @@
 ---
 - name: Update Pop Keyboard Shortcuts
-  become: true
   tags: always
   block:
     - name: Add '/usr/local' to git safe.directory

@@ -37,7 +37,6 @@
       ansible.builtin.apt:
         deb: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ rustdesk_latest_version }}/rustdesk-{{ rustdesk_latest_version }}-x86_64.deb
       ignore_errors: "{{ ansible_check_mode }}"
-      become: true
       when:
         - rustdesk_installed_version != rustdesk_latest_version
         - ansible_os_family == "Debian"
@@ -47,7 +46,6 @@
       ansible.builtin.apt:
         deb: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ rustdesk_latest_version }}/rustdesk-{{ rustdesk_latest_version }}-aarch64.deb
       ignore_errors: "{{ ansible_check_mode }}"
-      become: true
       when:
         - rustdesk_installed_version != rustdesk_latest_version
         - ansible_os_family == "Debian"

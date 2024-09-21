@@ -4,8 +4,9 @@
     path: /etc/systemd/sleep.conf
     line: "HibernateDelaySec=900"
     create: true
-    mode: "0440"
-  become: true
+    mode: '0440'
+    owner: root
+    group: root
   tags: always
 
 - name: Ensure AllowSuspendThenHibernate is set in sleep.conf
@@ -13,8 +14,9 @@
     path: /etc/systemd/sleep.conf
     line: "AllowSuspendThenHibernate=yes"
     create: true
-    mode: "0440"
-  become: true
+    mode: '0440'
+    owner: root
+    group: root
   tags: always
 
 - name: Ensure HandleLidSwitch is set in logind.conf
@@ -22,8 +24,9 @@
     path: /etc/systemd/logind.conf
     line: "HandleLidSwitch=hibernate"
     create: true
-    mode: "0440"
-  become: true
+    mode: '0440'
+    owner: root
+    group: root
   tags: laptop
 
 - name: Ensure HandleSuspendKey is set in logind.conf
@@ -31,16 +34,18 @@
     path: /etc/systemd/logind.conf
     line: "HandleSuspendKey=suspend-then-hibernate"
     create: true
-    mode: "0440"
-  become: true
+    mode: '0440'
+    owner: root
+    group: root
   tags: always
 
 - name: Create /etc/polkit-1/localauthority/10-vendor.d directory if it does not exist
   ansible.builtin.file:
     path: /etc/polkit-1/localauthority/10-vendor.d
     state: directory
-    mode: "0440"
-  become: true
+    mode: '0440'
+    owner: root
+    group: root
   tags: always
 
 # TODO: doesn't seem to work in cosmic
@@ -57,8 +62,9 @@
       Identity=unix-user:*
       Action=org.freedesktop.login1.hibernate;org.freedesktop.login1.handle-hibernate-key;org.freedesktop.login1;org.freedesktop.login1.hibernate-multiple-sessions;org.freedesktop.login1.hibernate-ignore-inhibit
       ResultActive=yes
-    mode: "0440"
-  become: true
+    mode: '0440'
+    owner: root
+    group: root
   tags: always
 
 - name: Ensure the user can suspend without password
@@ -66,8 +72,9 @@
     path: /etc/sudoers.d/sleepstates
     line: "{{ main_user }} ALL=NOPASSWD: /bin/systemctl suspend"
     create: true
-    mode: "0440"
-  become: true
+    mode: '0440'
+    owner: root
+    group: root
   tags: always
 
 - name: Ensure the user can hibernate without password
@@ -75,8 +82,9 @@
     path: /etc/sudoers.d/sleepstates
     line: "{{ main_user }} ALL=NOPASSWD: /bin/systemctl hibernate"
     create: true
-    mode: "0440"
-  become: true
+    mode: '0440'
+    owner: root
+    group: root
   tags: always
 
 - name: Ensure the user can suspend-then-hibernate without password
@@ -84,15 +92,15 @@
     path: /etc/sudoers.d/sleepstates
     line: "{{ main_user }} ALL=NOPASSWD: /bin/systemctl suspend-then-hibernate"
     create: true
-    mode: "0440"
-  become: true
+    mode: '0440'
+    owner: root
+    group: root
   tags: always
 
 - name: Dconf requirement installation
   ansible.builtin.apt:
     state: present
     name: python3-psutil
-  become: true
   tags: laptop
 
 - name: Configure sleep-inactive-ac-type

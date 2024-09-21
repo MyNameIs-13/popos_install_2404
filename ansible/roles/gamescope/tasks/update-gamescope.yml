@@ -1,6 +1,5 @@
 ---
 - name: Update Gamescope
-  become: true
   tags: home
   when:
     - ansible_distribution_version == "24.04"

@@ -51,7 +51,6 @@
       - libavif-dev
       - hwdata
     state: present
-  become: true
   tags: home
   when:
     - ansible_distribution_version == "24.04"
@@ -64,7 +63,6 @@
     single_branch: true
     version: "3.14.24"
   notify: Update Gamescope
-  become: true
   tags: home
   when:
     - ansible_distribution_version == "24.04"

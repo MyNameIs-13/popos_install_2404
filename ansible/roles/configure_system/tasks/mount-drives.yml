@@ -1,6 +1,5 @@
 ---
 - name: Mount mean-machine drives
-  become: true
   tags: desktop
   when: ("mean-machine" in ansible_hostname)
   block:

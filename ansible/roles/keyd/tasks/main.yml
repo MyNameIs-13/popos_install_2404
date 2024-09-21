@@ -1,21 +1,22 @@
 ---
 - name: Keyd
   tags: always
-  become: true
   when: ansible_distribution_version == "24.04"
   block:
     - name: Creates /etc/keyd
       ansible.builtin.file:
         path: /etc/keyd
         state: directory
-        mode: "0644"
-
+        mode: '0777'
+        owner: root
+        group: root
     - name: Create keyd config file
       ansible.builtin.template:
         src: keyd_mapping.j2
         dest: /etc/keyd/default.conf
-        mode: "0644"
-
+        mode: '0666'
+        owner: root
+        group: root
     - name: Install required packages
       ansible.builtin.apt:
         name:

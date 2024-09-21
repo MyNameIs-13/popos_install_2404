@@ -1,21 +1,21 @@
 ---
 - name: Add syncthing repo, install and start
-  become: true
   tags: home
   block:
     - name: Get syncthing key, save in /usr/share/keyrings for newer apt deb syntax
       ansible.builtin.get_url:
         url: https://syncthing.net/release-key.gpg
         dest: /usr/share/keyrings/syncthing-archive-keyring.gpg
-        mode: "0644"
-
+        mode: '0644'
+        owner: root
+        group: root
     - name: Add syncthing apt repository
       ansible.builtin.apt_repository:
         repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/syncthing-archive-keyring.gpg] https://apt.syncthing.net/ syncthing stable"
         state: present
         filename: syncthing
         update_cache: true
-        mode: "0644"
+        mode: '0644'
         validate_certs: true
       when: ansible_architecture == "x86_64"
 
@@ -25,7 +25,7 @@
         state: present
         filename: syncthing
         update_cache: true
-        mode: "0644"
+        mode: '0644'
         validate_certs: true
       when: ansible_architecture == "aarch64"
 

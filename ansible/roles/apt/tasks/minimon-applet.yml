@@ -18,7 +18,6 @@
       ansible.builtin.stat:
         path: /opt/minimon-applet/VERSION
       register: minimon_version_file
-      become: true
 
     - name: Set installed_version based on file existence
       ansible.builtin.set_fact:
@@ -39,7 +38,6 @@
       ignore_errors: "{{ ansible_check_mode }}"
 
     - name: When there is no VERSION or it's contents don't match, do these
-      become: true
       when: minimon_installed_version != minimon_latest_version
       block:
         - name: Remove old installer
@@ -52,6 +50,8 @@
             path: /opt/minimon-applet
             state: directory
             mode: '0777'
+            owner: root
+            group: root
 
         - name: Download minimon
           ansible.builtin.unarchive:
@@ -59,11 +59,15 @@
                   /cosmic-applet-minimon_{{ minimon_latest_version }}_amd64.zip"
             dest: /opt/minimon-applet
             remote_src: true
+            mode: '0755'
+            owner: root
+            group: root
           ignore_errors: true
           register: minimon_download
           until: "minimon_download is not failed"
           retries: 3
           delay: 10
+
 
         - name: Find the minimon directory with version number
           ansible.builtin.find:

@@ -1,6 +1,5 @@
 ---
 - name: Apt
-  become: true
   when: ansible_os_family == "Debian"
   block:
     - name: Add ansible repository into sources list

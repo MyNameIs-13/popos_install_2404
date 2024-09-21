@@ -1,6 +1,5 @@
 ---
 - name: Update Gamemode Applet
-  become: true
   tags: always
   block:
     - name: Add '/usr/local' to git safe.directory

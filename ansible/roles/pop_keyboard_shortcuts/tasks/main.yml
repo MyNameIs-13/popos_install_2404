@@ -7,7 +7,6 @@
       - rustc
       - just
     state: present
-  become: true
   tags: gui
   when:
     - ansible_distribution_version == "24.04"
@@ -19,7 +18,6 @@
     dest: /usr/local/shell-shortcuts
     version: master
   notify: Update Pop Keyboard Shortcuts
-  become: true
   tags: gui
   when:
     - ansible_distribution_version == "24.04"

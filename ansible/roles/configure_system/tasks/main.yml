@@ -44,7 +44,6 @@
   notify:
     - Add '/usr/local' to git safe.directory
     - Update arrpc
-  become: true
   ignore_errors: "{{ ansible_check_mode }}"
   tags: gui
 
@@ -61,10 +60,20 @@
   notify:
     - Add '/usr/local' to git safe.directory
     - Update framework fancontrol
-  become: true
   tags: laptop
   when:
-    - ansible_distribution_version == "24.04"
+    - ansible_hostname == "framework"
+
+- name: Ensure the user can use ectool
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/ectool
+    line: "{{ main_user }} ALL=NOPASSWD: /usr/bin/ectool*"
+    create: true
+    mode: '0440'
+    owner: root
+    group: root
+  tags: laptop
+  when:
     - ansible_hostname == "framework"
 
 - name: Add noise-suppression-for-voice
@@ -86,7 +95,6 @@
   tags: always
 
 - name: Remove /root/.bashrc if it isn't a symlink, then create symlink
-  become: true
   tags: always
   block:
     - name: Check if /root/.bashrc is a symlink
@@ -111,7 +119,6 @@
         state: link
 
 - name: Remove /root/.vimrc if it isn't a symlink, then create symlink
-  become: true
   tags: always
   block:
     - name: Check if /root/.vimrc is a symlink

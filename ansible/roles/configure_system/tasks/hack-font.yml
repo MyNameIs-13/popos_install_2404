@@ -15,7 +15,6 @@
   ansible.builtin.stat:
     path: /usr/local/share/fonts/hack-nerd-font/VERSION
   register: hack_version_file
-  become: true
   tags: always
 
 - name: Set installed_version based on file existence
@@ -40,7 +39,6 @@
 
 - name: When there is no VERSION or it's contents don't match, do these
   ignore_errors: "{{ ansible_check_mode }}"
-  become: true
   tags: always
   when: hack_installed_version != hack_latest_version
   block:
@@ -53,7 +51,9 @@
       ansible.builtin.file:
         path: /usr/local/share/fonts/hack-nerd-font
         state: directory
-        mode: '0666'
+        mode: '0777'
+        owner: root
+        group: root
 
     - name: Download Hack
       ansible.builtin.unarchive:
@@ -70,4 +70,6 @@
         content: "{{ hack_latest_version }}"
         dest: /usr/local/share/fonts/hack-nerd-font/VERSION
         mode: '0666'
+        owner: root
+        group: root
       when: hack_download is not failed

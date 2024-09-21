@@ -7,7 +7,6 @@
       - rustc
       - just
     state: present
-  become: true
   tags: gui
   when:
     - ansible_distribution_version == "24.04"
@@ -18,7 +17,6 @@
     repo: https://github.com/{{ user }}/{{ repo }}.git
     dest: /usr/local/gamemode_applet
     version: main
-  become: true
   notify: Update Gamemode Applet
   ignore_errors: "{{ ansible_check_mode }}"
   tags: gui

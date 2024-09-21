@@ -16,7 +16,6 @@
   ansible.builtin.stat:
     path: /opt/zed.app/VERSION
   register: zed_version_file
-  become: true
   tags: always
 
 - name: Set installed_version based on file existence
@@ -41,7 +40,6 @@
 
 - name: When there is no VERSION or it's contents don't match, do these
   ignore_errors: "{{ ansible_check_mode }}"
-  become: true
   tags: always
   when: installed_version != latest_version
   block:
@@ -55,7 +53,9 @@
         url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ latest_version }}/zed-linux-x86_64.tar.gz
         dest: /tmp/zed-editor.tar.gz
         timeout: 1200
-        mode: "0644"
+        mode: '0644'
+        owner: root
+        group: root
       register: zed_download
       until: "zed_download is not failed"
       retries: 3
@@ -68,7 +68,9 @@
         url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ latest_version }}/zed-linux-aarch64.tar.gz
         dest: /tmp/zed-editor.tar.gz
         timeout: 1200
-        mode: "0644"
+        mode: '0644'
+        owner: root
+        group: root
       register: zed_download
       until: "zed_download is not failed"
       retries: 3
@@ -80,7 +82,9 @@
       ansible.builtin.unarchive:
         src: /tmp/zed-editor.tar.gz
         dest: /opt/
-        mode: "0755"
+        mode: '0755'
+        owner: root
+        group: root
       when: zed_download is not failed
 
     - name: Remove /tmp/zed-editor.tar.gz after unarchiving
@@ -92,7 +96,9 @@
       ansible.builtin.copy:
         content: "{{ latest_version }}"
         dest: /opt/zed.app/VERSION
-        mode: "0644"
+        mode: '0644'
+        owner: root
+        group: root
       when: zed_download is not failed
 
     - name: Create a symbolic link
@@ -124,7 +130,9 @@
           [Desktop Action NewWorkspace]
           Exec=/opt/zed.app/libexec/zed-editor --new %U
           Name=Open a new workspace
-        mode: "0644"
+        mode: '0755'
+        owner: root
+        group: root
       when: zed_download is not failed
 
     # https://github.com/zed-industries/zed/issues/15629#issuecomment-2277029842

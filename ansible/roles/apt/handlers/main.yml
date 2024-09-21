@@ -8,7 +8,6 @@
   args:
     chdir: /usr/share/doc/git/contrib/credential/libsecret
   changed_when: true
-  become: true
   tags: always
 
 - name: Add minimon version file
@@ -16,14 +15,14 @@
     content: "{{ minimon_latest_version }}"
     dest: /opt/minimon-applet/VERSION
     mode: '0777'
-  become: true
+    owner: root
+    group: root
   tags: always
 
 - name: Gather updated packages  # noqa: risky-shell-pipe
   ansible.builtin.shell: grep -E "^$(date +%Y-%m-%d).+ (install|upgrade) " /var/log/dpkg.log | cut -d " " -f 3-5
   register: apt_updated_packages
   changed_when: true
-  become: true
   tags: always
   listen: List installed and updated apt packages
 

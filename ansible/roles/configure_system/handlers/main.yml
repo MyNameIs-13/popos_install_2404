@@ -4,7 +4,6 @@
     name: safe.directory
     scope: system
     value: /usr/local
-  become: true
   tags: always
 
 - name: Update arrpc
@@ -12,19 +11,16 @@
   args:
     chdir: /usr/local/arrpc
   changed_when: true
-  become: true
   tags: always
 
 - name: Reload systemd daemon to recognize new services
   ansible.builtin.systemd_service:
     daemon_reload: true
-  become: true
   tags: always
 
 - name: Update framework fancontrol
-  ansible.builtin.command: ./install.sh
+  ansible.builtin.command: ./install.sh --no-sudo
   args:
     chdir: /usr/local/fw-fanctrl
   changed_when: true
-  become: true
   tags: always

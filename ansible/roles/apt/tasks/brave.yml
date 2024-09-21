@@ -1,6 +1,5 @@
 ---
 - name: Add brave repo and install
-  become: true
   tags: gui
   when: ansible_architecture == "x86_64"
   block:
@@ -8,15 +7,16 @@
       ansible.builtin.get_url:
         url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
         dest: /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        mode: "0644"
-
+        mode: '0644'
+        owner: root
+        group: root
     - name: Add brave apt repository
       ansible.builtin.apt_repository:
         repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"
         state: present
         filename: brave-browser-release
         update_cache: true
-        mode: "0644"
+        mode: '0644'
         validate_certs: true
 
     - name: Install brave browser
@@ -29,19 +29,25 @@
       ansible.builtin.template:
         src: brave-settings.j2
         dest: /opt/brave.com/brave/initial_preferences
-        mode: '666'
+        mode: '0666'
+        owner: root
+        group: root
 
     - name: Add bookmarks
       ansible.builtin.template:
         src: brave-bookmarks.html.j2
         dest: /opt/brave.com/brave/bookmarks.html
-        mode: '666'
+        mode: '0666'
+        owner: root
+        group: root
 
     - name: Create extensions folder
       ansible.builtin.file:
         path: /opt/brave.com/brave/extensions
         state: directory
-        mode: '666'
+        mode: '0777'
+        owner: root
+        group: root
 
     - name: Add extensions
       ansible.builtin.copy:
@@ -50,7 +56,9 @@
           {
             "external_update_url": "https://clients2.google.com/service/update2/crx"
           }
-        mode: '666'
+        mode: '0666'
+        owner: root
+        group: root
       with_items:
         - "oboonakemofpalcgghocfoadofidjkkk" # keepassxc
         - "danncghahncanipdoajmakdbeaophenb" # auto-group-tabs

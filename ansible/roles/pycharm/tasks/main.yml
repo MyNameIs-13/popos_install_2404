@@ -50,7 +50,6 @@
 
 - name: When there is no installed_version or it's contents don't match, do these
   ignore_errors: "{{ ansible_check_mode }}"
-  become: true
   tags: gui
   when: pycharm_installed_version != pycharm_latest_version
   block:
@@ -72,7 +71,9 @@
         url: "https://download.jetbrains.com/python/pycharm-community-{{ pycharm_latest_version }}.tar.gz"
         dest: /tmp/pycharm-community.tar.gz
         timeout: 800
-        mode: "0644"
+        mode: '0644'
+        owner: root
+        group: root
       register: pycharm_download
       until: "pycharm_download is not failed"
       retries: 3
@@ -84,7 +85,9 @@
         url: "https://download.jetbrains.com/python/pycharm-community-{{ pycharm_latest_version }}-aarch64.tar.gz"
         dest: /tmp/pycharm-community.tar.gz
         timeout: 800
-        mode: "0644"
+        mode: '0644'
+        owner: root
+        group: root
       register: pycharm_download
       until: "pycharm_download is not failed"
       retries: 3
@@ -96,7 +99,9 @@
       ansible.builtin.unarchive:
         src: /tmp/pycharm-community.tar.gz
         dest: /opt/
-        mode: "0755"
+        mode: '0755'
+        owner: root
+        group: root
       when: pycharm_download is not failed
 
     - name: Remove /tmp/pycharm-community.tar.gz after unarchiving
@@ -115,5 +120,7 @@
       ansible.builtin.template:
         src: pycharm.desktop.j2
         dest: /usr/share/applications/pycharm.desktop
-        mode: "0644"
+        mode: '0644'
+        owner: root
+        group: root
       when: pycharm_download is not failed
