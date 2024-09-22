@@ -15,7 +15,7 @@
 - name: Clone the gamemode repository  # noqa: latest[git] I want to have the latest
   ansible.builtin.git:
     repo: https://github.com/{{ user }}/{{ repo }}.git
-    dest: /usr/local/gamemode_applet
+    dest: /usr/local/gamemode-applet
     version: main
   notify: Update Gamemode Applet
   ignore_errors: "{{ ansible_check_mode }}"
