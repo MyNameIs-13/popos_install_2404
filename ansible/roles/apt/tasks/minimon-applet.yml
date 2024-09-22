@@ -1,87 +1,20 @@
 ---
-- name: Minimon
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - git
+      - cargo
+      - rustc
+      - just
+      - lm-sensors
+    state: present
   tags: laptop,vm
-  when: ansible_os_family == "Debian"
-  block:
-    - name: Scrape URL for latest version
-      ansible.builtin.uri:
-        url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
-        return_content: true
-      register: minimon_latest
 
-    - name: Split version out
-      ansible.builtin.set_fact:
-        minimon_latest_version: "{{ minimon_latest.json.tag_name | regex_replace('v') }}"
-      ignore_errors: "{{ ansible_check_mode }}"
-
-    - name: Check if /opt/minimon-applet/VERSION exists
-      ansible.builtin.stat:
-        path: /opt/minimon-applet/VERSION
-      register: minimon_version_file
-
-    - name: Set installed_version based on file existence
-      ansible.builtin.set_fact:
-        minimon_installed_version: "{{ lookup('file', '/opt/minimon-applet/VERSION') }}"
-      when: minimon_version_file.stat.exists
-
-    - name: Set installed_version to 'not installed' if file does not exist
-      ansible.builtin.set_fact:
-        minimon_installed_version: "not installed"
-      tags: gui
-      when: not minimon_version_file.stat.exists
-
-    - name: Display the minimon version
-      ansible.builtin.debug:
-        msg:
-          - "installed: {{ minimon_installed_version }}"
-          - "available: {{ minimon_latest_version }}"
-      ignore_errors: "{{ ansible_check_mode }}"
-
-    - name: When there is no VERSION or it's contents don't match, do these
-      when: minimon_installed_version != minimon_latest_version
-      block:
-        - name: Remove old installer
-          ansible.builtin.file:
-            path: /opt/minimon-applet
-            state: absent
-
-        - name: Creates the folder
-          ansible.builtin.file:
-            path: /opt/minimon-applet
-            state: directory
-            mode: '0777'
-            owner: root
-            group: root
-
-        - name: Download minimon
-          ansible.builtin.unarchive:
-            src: "https://github.com/{{ user }}/{{ repo }}/releases/download/v{{ minimon_latest_version }}\
-                  /cosmic-applet-minimon_{{ minimon_latest_version }}_amd64.zip"
-            dest: /opt/minimon-applet
-            remote_src: true
-            mode: '0755'
-            owner: root
-            group: root
-          ignore_errors: true
-          register: minimon_download
-          until: "minimon_download is not failed"
-          retries: 3
-          delay: 10
-
-
-        - name: Find the minimon directory with version number
-          ansible.builtin.find:
-            paths: /opt/minimon-applet/cosmic-applet-minimon_{{ minimon_latest_version }}_amd64/
-            patterns: "POP_OS-*24.04*"
-            file_type: directory
-          register: minimon_found_directories
-
-        - name: Install minimon
-          ansible.builtin.apt:
-            deb: "{{ minimon_found_directories.files[0].path }}/cosmic-applet-minimon_{{ minimon_latest_version }}_amd64.deb"
-          ignore_errors: "{{ ansible_check_mode }}"
-          notify: Add minimon version file
-          when:
-            - ansible_os_family == "Debian"
-            - ansible_architecture == "x86_64"
-            - minimon_download is not failed
+- name: Clone the minimon repository  # noqa: latest[git] I want to have the latest
+  ansible.builtin.git:
+    repo: https://github.com/{{ user }}/{{ repo }}.git
+    dest: /usr/local/minimon-applet
+    version: main
+  notify: Update Minimon Applet
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags: laptop,vm

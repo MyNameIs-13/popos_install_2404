@@ -3,20 +3,15 @@
   ansible.builtin.include_tasks: roles/apt/tasks/update-gamemode-applet.yml
   tags: always
 
+- name: Update Minimon Applet
+  ansible.builtin.include_tasks: roles/apt/tasks/update-minimon-applet.yml
+  tags: always
+
 - name: Make git-credential-libsecret
   ansible.builtin.command: make
   args:
     chdir: /usr/share/doc/git/contrib/credential/libsecret
   changed_when: true
-  tags: always
-
-- name: Add minimon version file
-  ansible.builtin.copy:
-    content: "{{ minimon_latest_version }}"
-    dest: /opt/minimon-applet/VERSION
-    mode: '0777'
-    owner: root
-    group: root
   tags: always
 
 - name: Gather updated packages  # noqa: risky-shell-pipe

@@ -30,7 +30,7 @@
       ansible.builtin.include_tasks:
         file: minimon-applet.yml
       vars:
-        user: "Hyperchaotic"
+        user: "MyNameIs-13"
         repo: "minimon-applet"
       tags: laptop,vm
 
