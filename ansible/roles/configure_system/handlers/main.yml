@@ -18,9 +18,9 @@
     daemon_reload: true
   tags: always
 
-- name: Update framework fancontrol
-  ansible.builtin.command: ./install.sh --no-sudo
-  args:
+- name: Update framework fancontrol # noqa: command-instead-of-shell
+  ansible.builtin.shell:
+    cmd: sudo ./install.sh
     chdir: /usr/local/fw-fanctrl
   changed_when: true
   tags: always
