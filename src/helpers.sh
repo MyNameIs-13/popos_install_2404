@@ -120,31 +120,6 @@ function text_in_file_append() {
     fi
 }
 
-function autostart_entry_kde() {
-    local part="$1"
-
-    sudo sh -c "cat > ${autostart_file}" << EOF
-[Desktop Entry]
-Comment[en_US]=
-Comment=
-Exec=/home/deck/Documents/scm/system_install/install.sh ${part}
-GenericName[en_US]=
-GenericName=
-Icon=dialog-scripts
-MimeType=
-Name[en_US]=install.sh
-Name=install.sh
-Path=
-StartupNotify=true
-Terminal=true
-TerminalOptions=\s--noclose
-Type=Application
-X-KDE-AutostartScript=true
-X-KDE-SubstituteUID=false
-X-KDE-Username=
-EOF
-}
-
 function autostart_entry() {
     local part="$1"
 
@@ -162,17 +137,12 @@ EOF
 function autostart_file() {
     local autostart_file="$1"
     local part="$2"
-    local de="$3"
 
     if [[ -e "${autostart_file}" ]]; then
         sudo rm "${autostart_file}"
     fi
 
-    if [[ -n "${part}" && "${de}" == "KDE" ]]; then
-        autostart_entry_kde "${part}"
-    elif [[ -n "${part}" ]]; then
-        autostart_entry "${part}"
-    fi
+    autostart_entry "${part}"
 }
 
 function initiate_reboot() {
