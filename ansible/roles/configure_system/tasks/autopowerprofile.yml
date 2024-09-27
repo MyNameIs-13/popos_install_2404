@@ -76,6 +76,7 @@
     mode: '0644'
     owner: root
     group: root
+  notify: Reload udev rules
   tags: laptop
 
 - name: Enable powerprofile_battery service
