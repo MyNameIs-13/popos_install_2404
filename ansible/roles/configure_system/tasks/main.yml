@@ -141,3 +141,8 @@
         dest: /root/.vimrc
         force: true
         state: link
+
+- name: Add gamepad support
+  ansible.builtin.include_tasks:
+    file: gamepad.yml
+  tags: gui
