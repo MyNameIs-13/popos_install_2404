@@ -24,3 +24,17 @@
     chdir: /usr/local/fw-fanctrl
   changed_when: true
   tags: always
+
+- name: Reload udev rules
+  ansible.builtin.command: udevadm control --reload-rules
+  become: true
+  changed_when: true
+  listen: Reload udev rules
+  tags: always
+
+- name: Trigger new udev rules
+  ansible.builtin.command: udevadm trigger
+  become: true
+  changed_when: true
+  listen: Reload udev rules
+  tags: always

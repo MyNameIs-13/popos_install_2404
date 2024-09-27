@@ -142,7 +142,28 @@
         force: true
         state: link
 
-- name: Add gamepad support
-  ansible.builtin.include_tasks:
-    file: gamepad.yml
+- name: Add udev gamepad rules
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: /etc/udev/rules.d/{{ item }}
+    mode: '0644'
+    owner: root
+    group: root
+  become: true
+  notify: Reload udev rules
+  loop:
+    - 71-8bitdo-controllers.rules
+    - 71-uinput-dev-early-creation.rules
+  tags: gui
+
+- name: Create /etc/modules-load.d/uinput.conf
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/uinput.conf
+    content: |
+      uinput
+    mode: '0644'
+    owner: root
+    group: root
+  become: true
+  notify: Reload udev rules
   tags: gui
