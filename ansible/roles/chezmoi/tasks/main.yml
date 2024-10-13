@@ -53,3 +53,10 @@
     - chezmoi_installed_version != chezmoi_latest_version
     - ansible_os_family == "Debian"
     - ansible_architecture == "aarch64"
+
+- name: Clone dotfiles
+  ansible.builtin.git:
+    repo: https://github.com/MyNameIs-13/dotfiles.git
+    dest: "{{ __dotfiles_dest }}"
+    version: master
+  tags: always

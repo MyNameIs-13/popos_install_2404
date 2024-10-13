@@ -153,10 +153,9 @@ else
         fi
         inventory="${GIT_PATH}/ansible/hosts.yml"
         # TODO: add error handling in case ansible-playbook stops
-        sudo ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -T 60 -t "${tags}" -e main_user=${USER}
+        sudo ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -T 60 -t "${tags}" -e main_user=${USER} -e __dotfiles_dest="${GIT_PATH}/../dotfiles"
 
-        git clone https://github.com/MyNameIs-13/dotfiles.git "${GIT_PATH}/../dotfiles"
-        chezmoi init --apply --source "${GIT_PATH}/../dotfiles/chezmoi"
+        chezmoi init --apply --source "${GIT_PATH}/../dotfiles"
 
         echo
         echo "${BOLD}reboot recommended to apply all changes correctly${NORMAL}"
