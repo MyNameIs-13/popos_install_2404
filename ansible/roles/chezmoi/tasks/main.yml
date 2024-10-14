@@ -59,4 +59,5 @@
     repo: https://github.com/MyNameIs-13/dotfiles.git
     dest: "{{ __dotfiles_dest }}"
     version: master
+  when: __dotfiles_dest is defined
   tags: always
