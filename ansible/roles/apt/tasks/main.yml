@@ -193,6 +193,7 @@
       ansible.builtin.apt:
         name: "*"
         state: latest
+        allow_downgrade: true
       notify: List installed and updated apt packages
       tags: always
 
