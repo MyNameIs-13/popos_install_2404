@@ -12,7 +12,7 @@
   tags: always
 
 - name: Check installed oh-my-posh version
-  ansible.builtin.command: /usr/local/bin/oh-my-posh --version
+  ansible.builtin.command: /usr/local/bin/oh-my-posh version
   register: ohmyposh_installed_version_output
   ignore_errors: true  # when not installed, error is expected
   changed_when: true
