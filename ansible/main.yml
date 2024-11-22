@@ -8,7 +8,7 @@
     - role: configure_system
     - role: ohmyposh
     - role: chezmoi
-    - role: joplin
+    # - role: joplin
     - role: keyd
     - role: zed_editor
     - role: rustdesk
