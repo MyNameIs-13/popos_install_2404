@@ -1,0 +1,66 @@
+---
+- name: Heroic Game Launcher
+  tags: gui
+  when: ansible_os_family == "Debian"
+  block:
+    - name: Scrape URL for latest version
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
+        return_content: true
+      register: heroic_latest
+
+    - name: Split version out
+      ansible.builtin.set_fact:
+        heroic_latest_version: "{{ heroic_latest.json.tag_name | regex_replace('v') }}"
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Check if /opt/heroic/VERSION exists
+      ansible.builtin.stat:
+        path: /opt/heroic/VERSION
+      register: heroic_version_file
+
+    - name: Set installed_version based on file existence
+      ansible.builtin.set_fact:
+        heroic_installed_version: "{{ lookup('file', '/opt/heroic/VERSION') }}"
+      when: heroic_version_file.stat.exists
+
+    - name: Set installed_version to 'not installed' if file does not exist
+      ansible.builtin.set_fact:
+        heroic_installed_version: "not installed"
+      when: not heroic_version_file.stat.exists
+
+    - name: Display the heroic version
+      ansible.builtin.debug:
+        msg:
+          - "installed: {{ heroic_installed_version }}"
+          - "available: {{ heroic_latest_version }}"
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Install heroic
+      ansible.builtin.apt:
+        deb: https://github.com/{{ user }}/{{ repo }}/releases/download/v{{ heroic_latest_version }}/Heroic_{{ heroic_latest_version }}_amd64.deb
+      ignore_errors: "{{ ansible_check_mode }}"
+      when:
+        - heroic_installed_version != heroic_latest_version
+        - ansible_os_family == "Debian"
+        - ansible_architecture == "x86_64"
+
+    - name: Creates the folder where VERSION
+      ansible.builtin.file:
+        path: /opt/heroic
+        state: directory
+        mode: '0777'
+        owner: root
+        group: root
+
+    - name: Add VERSION file
+      ansible.builtin.copy:
+        content: "{{ heroic_latest_version }}"
+        dest: /opt/heroic/VERSION
+        mode: '0644'
+        owner: root
+        group: root
+      when:
+        - heroic_installed_version != heroic_latest_version
+        - ansible_os_family == "Debian"
+        - ansible_architecture == "x86_64"
