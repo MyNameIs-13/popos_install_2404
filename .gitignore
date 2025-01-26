@@ -1,0 +1,8 @@
+**/.idea/*
+**/.vscode
+**/coverage
+**/.env
+**/.aws
+**/.ssh
+**/venv
+**/env
