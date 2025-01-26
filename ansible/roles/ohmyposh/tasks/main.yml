@@ -40,7 +40,8 @@
     mode: '0755'
     owner: root
     group: root
-  ignore_errors: "{{ ansible_check_mode }}"
+  # ignore_errors: "{{ ansible_check_mode }}"
+  ignore_errors: true
   tags: always
   when:
     - ohmyposh_installed_version != ohmyposh_latest_version
@@ -51,7 +52,8 @@
     url: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ ohmyposh_latest_version }}/posh-linux-arm64
     dest: "/usr/local/bin/oh-my-posh"
     mode: '0755'
-  ignore_errors: "{{ ansible_check_mode }}"
+  # ignore_errors: "{{ ansible_check_mode }}"
+  ignore_errors: true
   tags: always
   when:
     - ohmyposh_installed_version != ohmyposh_latest_version

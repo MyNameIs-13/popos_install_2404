@@ -14,6 +14,17 @@
         state: present
       tags: always
 
+    - name: Add trivy repository into sources list
+      deb822_repository:
+        name: trivy
+        types: deb
+        uris:  https://aquasecurity.github.io/trivy-repo/deb
+        suites: generic
+        components: main
+        architectures: amd64
+        signed_by: https://aquasecurity.github.io/trivy-repo/deb/public.key
+      tags: always
+
     - name: Run the equivalent of "apt-get update"
       ansible.builtin.apt:
         update_cache: true
@@ -102,6 +113,10 @@
       notify: List installed and updated apt packages
       tags: always
 
+#  TODO: execute these commands with ansible
+# sudo dpkg --configure -a
+# sudo apt --fix-broken install
+
     - name: Install libsecret command line tools and libs
       ansible.builtin.apt:
         state: present
@@ -140,6 +155,7 @@
           - texlive-science
           - texlive-xetex
           - quickemu
+          - trivy
       notify: List installed and updated apt packages
       tags: gui
 
@@ -189,26 +205,22 @@
       tags: gui
       when: ("vm" is in ansible_hostname)
 
+    - name: fix package dependencies
+      ansible.builtin.apt:
+        name: "*"
+        state: fixed
+        allow_downgrade: true
+      notify: List installed and updated apt packages
+      tags: always
+
     - name: Update all packages to their latest version  # noqa: package-latest
       ansible.builtin.apt:
         name: "*"
         state: latest
         allow_downgrade: true
-      notify: List installed and updated apt packages
-      tags: always
-
-    - name: Remove dependencies that are no longer required and purge their configuration files
-      ansible.builtin.apt:
         autoremove: true
         purge: true
-      tags: always
-
-    - name: Run the equivalent of "apt-get autoclean"
-      ansible.builtin.apt:
-        autoclean: true
-      tags: always
-
-    - name: Run the equivalent of "apt-get clean"
-      ansible.builtin.apt:
         clean: true
+        autoclean: true
+      notify: List installed and updated apt packages
       tags: always
