@@ -50,7 +50,6 @@
       - libeis-dev
       - libavif-dev
       - hwdata
-      - luajit
     state: present
   tags: home
   when:
