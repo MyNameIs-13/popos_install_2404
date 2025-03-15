@@ -38,7 +38,7 @@
 
     - name: Install heroic
       ansible.builtin.apt:
-        deb: https://github.com/{{ user }}/{{ repo }}/releases/download/v{{ heroic_latest_version }}/Heroic_{{ heroic_latest_version }}_amd64.deb
+        deb: https://github.com/{{ user }}/{{ repo }}/releases/download/v{{ heroic_latest_version }}/Heroic-{{ heroic_latest_version }}-linux-amd64.deb
       ignore_errors: "{{ ansible_check_mode }}"
       when:
         - heroic_installed_version != heroic_latest_version

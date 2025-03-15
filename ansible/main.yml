@@ -14,5 +14,5 @@
     - role: rustdesk
     - role: pycharm
     - role: gamescope
-    - role: heroic_launcher
+    # - role: heroic_launcher
     - role: pop_keyboard_shortcuts

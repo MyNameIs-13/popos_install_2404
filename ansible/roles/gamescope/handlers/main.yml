@@ -2,3 +2,7 @@
 - name: Update Gamescope
   ansible.builtin.include_tasks: roles/gamescope/tasks/update-gamescope.yml
   tags: always
+
+- name: Update luajit
+  ansible.builtin.include_tasks: roles/gamescope/tasks/update-luajit.yml
+  tags: always

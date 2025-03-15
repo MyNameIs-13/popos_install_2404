@@ -13,7 +13,7 @@
         state: absent
         dest: /usr/local/minimon-applet/target
 
-    - name: Build project
+    - name: Build project minimon
       ansible.builtin.command: just build-release
       args:
         chdir: /usr/local/minimon-applet

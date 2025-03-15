@@ -26,7 +26,7 @@
     #     chdir: /usr/local/gamemode-applet
     #   changed_when: true
 
-    - name: Build project
+    - name: Build project gamemode
       ansible.builtin.command: just build-deb
       args:
         chdir: /usr/local/gamemode-applet

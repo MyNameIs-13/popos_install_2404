@@ -50,7 +50,19 @@
       - libeis-dev
       - libavif-dev
       - hwdata
+      - luajit
     state: present
+  tags: home
+  when:
+    - ansible_distribution_version == "24.04"
+    - ansible_os_family == "Debian"
+
+- name: Clone the luajit repository  # noqa: latest[git] I want to have the latest
+  ansible.builtin.git:
+    repo: https://luajit.org/git/luajit.git
+    dest: /usr/local/luajit
+    version: master
+  notify: Update luajit
   tags: home
   when:
     - ansible_distribution_version == "24.04"
@@ -60,8 +72,10 @@
   ansible.builtin.git:
     repo: https://github.com/ValveSoftware/gamescope.git
     dest: /usr/local/gamescope
-    single_branch: true
-    version: "3.14.24"
+    version: master
+    recursive: true
+    # single_branch: true
+    # version: "3.14.24"
   notify: Update Gamescope
   tags: home
   when:
