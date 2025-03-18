@@ -18,7 +18,7 @@
       deb822_repository:
         name: trivy
         types: deb
-        uris:  https://aquasecurity.github.io/trivy-repo/deb
+        uris: https://aquasecurity.github.io/trivy-repo/deb
         suites: generic
         components: main
         architectures: amd64
@@ -30,6 +30,10 @@
         update_cache: true
         cache_valid_time: 3600
       failed_when: false # sometimes fails due to 'unkown reason'
+      tags: always
+
+    - name: Configure dpkg
+      ansible.builtin.command: dpkg --configure -a
       tags: always
 
     - name: Add brave browser
@@ -110,12 +114,14 @@
           - libgtk-3-dev
           - just
           - ansible-lint
+          - adb
+          - fastboot
       notify: List installed and updated apt packages
       tags: always
 
-#  TODO: execute these commands with ansible
-# sudo dpkg --configure -a
-# sudo apt --fix-broken install
+    #  TODO: execute these commands with ansible
+    # sudo dpkg --configure -a
+    # sudo apt --fix-broken install
 
     - name: Install libsecret command line tools and libs
       ansible.builtin.apt:
@@ -205,7 +211,7 @@
       tags: gui
       when: ("vm" is in ansible_hostname)
 
-    - name: fix package dependencies
+    - name: Fix package dependencies
       ansible.builtin.apt:
         name: "*"
         state: fixed
@@ -213,7 +219,7 @@
       notify: List installed and updated apt packages
       tags: always
 
-    - name: Update all packages to their latest version  # noqa: package-latest
+    - name: Update all packages to their latest version # noqa: package-latest
       ansible.builtin.apt:
         name: "*"
         state: latest

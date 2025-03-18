@@ -7,7 +7,7 @@ command="chown --recursive ${USER_NAME}:${USER_NAME} /${REPO_NAME}"
 
 # default XDG folder
 sudo sed -i "s/=Templates/=.templates/" /mnt/etc/xdg/user-dirs.defaults
-sudo sed -i "s/^PUBLICSHARE/#PUBLICSHARE/" /mnt/etc/xdg/user-dirs.defaults
+sudo sed -i "s/^PUBLICSHARE=Public/PUBLICSHARE=.public/" /mnt/etc/xdg/user-dirs.defaults
 sudo sed -i "s/^PICTURES=Pictures/PICTURES=multimedia/" /mnt/etc/xdg/user-dirs.defaults
 sudo sed -i "s/^VIDEOS/#VIDEOS/" /mnt/etc/xdg/user-dirs.defaults
 sudo sed -i "s/^DOCUMENTS=Documents/DOCUMENTS=documents/" /mnt/etc/xdg/user-dirs.defaults

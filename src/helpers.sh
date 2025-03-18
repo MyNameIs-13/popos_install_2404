@@ -140,9 +140,9 @@ function autostart_file() {
 
     if [[ -e "${autostart_file}" ]]; then
         sudo rm "${autostart_file}"
+    else
+        autostart_entry "${part}"
     fi
-
-    autostart_entry "${part}"
 }
 
 function initiate_reboot() {

@@ -13,22 +13,22 @@
         dump: 0
         passno: 0
 
-    - name: Mount archive partition
-      ansible.posix.mount:
-        path: /home/{{ main_user }}/archive
-        src: /dev/mapper/archive
-        fstype: auto
-        opts: nosuid,nodev,nofail,x-gvfs-show
-        state: mounted
-        dump: 0
-        passno: 0
+    # - name: Mount archive partition
+    #   ansible.posix.mount:
+    #     path: /home/{{ main_user }}/archive
+    #     src: /dev/mapper/archive
+    #     fstype: auto
+    #     opts: nosuid,nodev,nofail,x-gvfs-show
+    #     state: mounted
+    #     dump: 0
+    #     passno: 0
 
-    - name: Mount virtual-machines partition
-      ansible.posix.mount:
-        path: /home/{{ main_user }}/virtual-machines
-        src: /dev/mapper/virtual-machines
-        fstype: auto
-        opts: nosuid,nodev,nofail,x-gvfs-show
-        state: mounted
-        dump: 0
-        passno: 0
+    # - name: Mount virtual-machines partition
+    #   ansible.posix.mount:
+    #     path: /home/{{ main_user }}/virtual-machines
+    #     src: /dev/mapper/virtual-machines
+    #     fstype: auto
+    #     opts: nosuid,nodev,nofail,x-gvfs-show
+    #     state: mounted
+    #     dump: 0
+    #     passno: 0

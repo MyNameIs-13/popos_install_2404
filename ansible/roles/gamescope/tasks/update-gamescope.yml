@@ -16,6 +16,12 @@
         state: absent
         dest: /usr/local/gamescope/build
 
+    # - name: Download submodules
+    #   ansible.builtin.command: git submodule update --init
+    #   args:
+    #     chdir: /usr/local/gamescope
+    #   changed_when: true
+
     - name: Run meson to configure the build directory
       ansible.builtin.command: meson setup build/
       args:

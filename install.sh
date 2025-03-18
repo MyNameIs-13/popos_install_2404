@@ -68,6 +68,7 @@ if [[ -z "${CONTINUE_SCRIPT}" || -z "${CONTINUE_SCRIPT##*[!0-9]*}" ]]; then
     unset user_name_arg
     HOST_NAME=$(prompt_until_valid hostname "${host_name_arg}")
     unset host_name_arg
+    validate_input "drive" ""  # show lsblk help
     DISK_NAME=$(prompt_until_valid drive "${disk_name_arg}")
     unset disk_name_arg
     PASSWORD=$(prompt_password "${password_arg}")
@@ -111,7 +112,8 @@ else
         systemctl --user stop gnome-gnome-keyring-daemon.service
         rm -r ~/.local/share/keyrings
         mkdir -p ~/.local/share/keyrings
-        echo "${BOLD}Create 'Default keyring' without password and set as default keyring.${NORMAL}"
+        echo "${BOLD}Keyring Workaround.${NORMAL}"
+        echo "${BOLD}Create keyring with name 'Default keyring' without password and set as default keyring.${NORMAL}"
         # FIXME: with COSMIC autounlock through luks key does not seem to work and default keyring is not created correctly
         seahorse
 
@@ -155,8 +157,11 @@ else
         # TODO: add error handling in case ansible-playbook stops
         sudo ansible-playbook "${GIT_PATH}/ansible/main.yml" -i "${inventory}" -T 60 -t "${tags}" -e main_user=${USER} -e __dotfiles_dest="${GIT_PATH}/../dotfiles"
 
+        echo -e "\n__________________________________________________________\n"
+        echo "${BOLD}Dotfile restore will now begin!${NORMAL}"
+        echo -e "\n__________________________________________________________\n"
         chezmoi init --apply --source "${GIT_PATH}/../dotfiles"
-
+        sudo chown -R ${USER}:${USER} "${GIT_PATH}/../dotfiles"
         echo
         echo "${BOLD}reboot recommended to apply all changes correctly${NORMAL}"
     fi
