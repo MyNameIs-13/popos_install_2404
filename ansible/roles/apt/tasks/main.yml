@@ -3,19 +3,29 @@
   when: ansible_os_family == "Debian"
   block:
     - name: Add ansible repository into sources list
-      ansible.builtin.apt_repository:
-        repo: ppa:ansible/ansible
-        state: present
+      ansible.builtin.deb822_repository:
+        name: ansible
+        types: deb
+        uris: https://ppa.launchpadcontent.net/ansible/ansible/ubuntu
+        suites: noble
+        components: main
+        architectures: amd64
+        signed_by: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x6125e2a8c77f2818fb7bd15b93c4a3fd7bb9c367
       tags: always
 
     - name: Add quickemu repository into sources list
-      ansible.builtin.apt_repository:
-        repo: ppa:flexiondotorg/quickemu
-        state: present
+      ansible.builtin.deb822_repository:
+        name: quickemu
+        types: deb
+        uris: https://ppa.launchpadcontent.net/flexiondotorg/quickemu/ubuntu
+        suites: noble
+        components: main
+        architectures: amd64
+        signed_by: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x08c0efb260a1eef3
       tags: always
 
     - name: Add trivy repository into sources list
-      deb822_repository:
+      ansible.builtin.deb822_repository:
         name: trivy
         types: deb
         uris: https://aquasecurity.github.io/trivy-repo/deb
@@ -35,6 +45,7 @@
     - name: Configure dpkg
       ansible.builtin.command: dpkg --configure -a
       tags: always
+      changed_when: true
 
     - name: Add brave browser
       ansible.builtin.include_tasks:
@@ -62,6 +73,18 @@
         deb: https://vencord.dev/download/vesktop/amd64/deb
       register: vesktop_download
       until: "vesktop_download is not failed"
+      retries: 3
+      delay: 10
+      failed_when: false
+      notify: List installed and updated apt packages
+      tags: gui
+      when: ansible_architecture == "x86_64"
+
+    - name: Install via.deb package
+      ansible.builtin.apt:
+        deb: https://github.com/the-via/releases/releases/download/v3.0.0/via-3.0.0-linux.deb
+      register: via_download
+      until: "via_download is not failed"
       retries: 3
       delay: 10
       failed_when: false
@@ -192,6 +215,8 @@
           - conky-all
           - nextcloud-desktop
           - virt-manager
+          - qemu-kvm
+          - bridge-utils
           - gamemode
           - mangohud
           - mangoapp

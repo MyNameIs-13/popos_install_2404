@@ -17,6 +17,7 @@
     repo: https://github.com/{{ user }}/{{ repo }}.git
     dest: /usr/local/gamemode-applet
     version: main
+    force: true
   notify: Update Gamemode Applet
   ignore_errors: "{{ ansible_check_mode }}"
   tags: gui

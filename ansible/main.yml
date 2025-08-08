@@ -13,6 +13,6 @@
     - role: zed_editor
     - role: rustdesk
     - role: pycharm
-    # - role: gamescope
-    # - role: heroic_launcher
+    - role: gamescope
+    - role: heroic_launcher
     - role: pop_keyboard_shortcuts

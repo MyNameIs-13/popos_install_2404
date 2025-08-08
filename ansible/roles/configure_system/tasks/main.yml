@@ -142,6 +142,17 @@
         force: true
         state: link
 
+- name: Add udev rules for via
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/92-viia.rules
+    content: |
+      KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0666", TAG+="uaccess", TAG+="udev-acl"
+    mode: '0644'
+    owner: root
+    group: root
+  notify: Reload udev rules
+  tags: gui
+
 - name: Add udev gamepad rules
   ansible.builtin.template:
     src: "{{ item }}.j2"

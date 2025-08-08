@@ -50,6 +50,7 @@
       - libeis-dev
       - libavif-dev
       - hwdata
+      - luajit
     state: present
   tags: home
   when:
@@ -78,35 +79,6 @@
   when:
     - ansible_distribution_version == "24.04"
     - ansible_os_family == "Debian"
-
-# - name: Check if gamescope repository exists locally
-#   ansible.builtin.stat:
-#     path: /usr/local/gamescope/.git
-#   register: gamescope_repo_stat
-#   tags: home
-#   when:
-#     - ansible_distribution_version == "24.04"
-#     - ansible_os_family == "Debian"
-
-# - name: Clone gamescope repository
-#   ansible.builtin.command: git clone https://github.com/ValveSoftware/gamescope.git /usr/local/gamescope
-#   notify: Update Gamescope
-#   tags: home
-#   when:
-#     - not gamescope_repo_stat.stat.exists
-#     - ansible_distribution_version == "24.04"
-#     - ansible_os_family == "Debian"
-
-# - name: Pull latest changes from gamescope repository
-#   ansible.builtin.command: git pull
-#   args:
-#     chdir: /usr/local/gamescope
-#   notify: Update Gamescope
-#   tags: home
-#   when:
-#     - gamescope_repo_stat.stat.exists
-#     - ansible_distribution_version == "24.04"
-#     - ansible_os_family == "Debian"
 
 - name: Clone the gamescope repository  # noqa: latest[git] I want to have the latest
   ansible.builtin.git:

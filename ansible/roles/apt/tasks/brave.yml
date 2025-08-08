@@ -3,21 +3,15 @@
   tags: gui
   when: ansible_architecture == "x86_64"
   block:
-    - name: Get brave key, save in /usr/share/keyrings for newer apt deb syntax
-      ansible.builtin.get_url:
-        url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
-        dest: /usr/share/keyrings/brave-browser-archive-keyring.gpg
-        mode: '0644'
-        owner: root
-        group: root
     - name: Add brave apt repository
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main"
-        state: present
-        filename: brave-browser-release
-        update_cache: true
-        mode: '0644'
-        validate_certs: true
+      ansible.builtin.deb822_repository:
+        name: brave-browser-release
+        types: deb
+        uris: https://brave-browser-apt-release.s3.brave.com/
+        suites: stable
+        components: main
+        architectures: amd64
+        signed_by: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
 
     - name: Install brave browser
       ansible.builtin.apt:
