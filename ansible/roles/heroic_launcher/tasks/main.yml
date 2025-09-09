@@ -16,12 +16,12 @@
 
     - name: Check if /opt/heroic/VERSION exists
       ansible.builtin.stat:
-        path: /opt/heroic/VERSION
+        path: /opt/Heroic/VERSION
       register: heroic_version_file
 
     - name: Set installed_version based on file existence
       ansible.builtin.set_fact:
-        heroic_installed_version: "{{ lookup('file', '/opt/heroic/VERSION') }}"
+        heroic_installed_version: "{{ lookup('file', '/opt/Heroic/VERSION') }}"
       when: heroic_version_file.stat.exists
 
     - name: Set installed_version to 'not installed' if file does not exist
@@ -45,9 +45,9 @@
         - ansible_os_family == "Debian"
         - ansible_architecture == "x86_64"
 
-    - name: Creates the folder where VERSION
+    - name: Creates the folder where VERSION will be stored
       ansible.builtin.file:
-        path: /opt/heroic
+        path: /opt/Heroic
         state: directory
         mode: '0777'
         owner: root
@@ -56,7 +56,7 @@
     - name: Add VERSION file
       ansible.builtin.copy:
         content: "{{ heroic_latest_version }}"
-        dest: /opt/heroic/VERSION
+        dest: /opt/Heroic/VERSION
         mode: '0644'
         owner: root
         group: root

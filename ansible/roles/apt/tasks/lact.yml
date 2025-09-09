@@ -1,0 +1,72 @@
+---
+- name: LACT
+  tags: gui
+  when:
+    - ansible_os_family == "Debian"
+    - ansible_architecture == "x86_64"
+  block:
+    - name: Scrape URL for latest version
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
+        return_content: true
+      register: lact_latest
+
+    - name: Split version out
+      ansible.builtin.set_fact:
+        lact_latest_version: "{{ lact_latest.json.tag_name | regex_replace('v') }}"
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Check if /opt/lact/VERSION exists
+      ansible.builtin.stat:
+        path: /opt/lact/VERSION
+      register: lact_version_file
+
+    - name: Set installed_version based on file existence
+      ansible.builtin.set_fact:
+        lact_installed_version: "{{ lookup('file', '/opt/lact/VERSION') }}"
+      when: lact_version_file.stat.exists
+
+    - name: Set installed_version to 'not installed' if file does not exist
+      ansible.builtin.set_fact:
+        lact_installed_version: "not installed"
+      when: not lact_version_file.stat.exists
+
+    - name: Display the lact version
+      ansible.builtin.debug:
+        msg:
+          - "installed: {{ lact_installed_version }}"
+          - "available: {{ lact_latest_version }}"
+      ignore_errors: "{{ ansible_check_mode }}"
+
+    - name: Install lact
+      ansible.builtin.apt:
+        deb: https://github.com/{{ user }}/{{ repo }}/releases/download/v{{ lact_latest_version }}/lact-{{ lact_latest_version }}-0.amd64.ubuntu-2404.deb
+      ignore_errors: "{{ ansible_check_mode }}"
+      when:
+        - lact_installed_version != lact_latest_version
+
+    - name: Enable lactd
+      ansible.builtin.systemd_service:
+        name: lactd
+        state: "started"
+        enabled: true
+
+    - name: Creates the folder where VERSION will be stored
+      ansible.builtin.file:
+        path: /opt/lact
+        state: directory
+        mode: '0777'
+        owner: root
+        group: root
+
+    - name: Add VERSION file
+      ansible.builtin.copy:
+        content: "{{ lact_latest_version }}"
+        dest: /opt/lact/VERSION
+        mode: '0644'
+        owner: root
+        group: root
+      when:
+        - lact_installed_version != lact_latest_version
+        - ansible_os_family == "Debian"
+        - ansible_architecture == "x86_64"

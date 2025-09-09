@@ -236,6 +236,14 @@
       tags: gui
       when: ("vm" is in ansible_hostname)
 
+    - name: Add LACT Software
+      ansible.builtin.include_tasks:
+        file: lact.yml
+      vars:
+        user: "ilya-zlobintsev"
+        repo: "LACT"
+      tags: gui
+
     - name: Fix package dependencies
       ansible.builtin.apt:
         name: "*"
