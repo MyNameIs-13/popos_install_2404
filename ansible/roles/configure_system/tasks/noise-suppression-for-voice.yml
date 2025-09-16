@@ -68,7 +68,6 @@
       retries: 3
       delay: 10
 
-
     - name: Add VERSION file
       ansible.builtin.copy:
         content: "{{ nsfv_latest_version }}"
