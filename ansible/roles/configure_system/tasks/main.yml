@@ -84,6 +84,14 @@
     repo: "noise-suppression-for-voice"
   tags: home
 
+- name: Add Proton GE
+  ansible.builtin.include_tasks:
+    file: proton-ge.yml
+  vars:
+    user: "GloriousEggroll"
+    repo: "proton-ge-custom"
+  tags: gui
+
 - name: Mount mean-machine drives
   ansible.builtin.include_tasks:
     file: mount-drives.yml

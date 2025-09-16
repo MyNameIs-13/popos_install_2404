@@ -1,0 +1,82 @@
+---
+- name: Scrape URL for latest version
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/{{ user }}/{{ repo }}/releases/latest
+    return_content: true
+  register: proton_latest
+  tags: gui
+
+- name: Split version out
+  ansible.builtin.set_fact:
+    proton_latest_version: "{{ proton_latest.json.tag_name }}"
+  tags: gui
+
+- name: Ensure compatibilitytools.d exists
+  file:
+    path: /home/{{ main_user }}/.steam/steam/compatibilitytools.d
+    state: directory
+    mode: '0777'
+    owner: "{{ main_user }}"
+    group: "{{ main_user }}"
+  tags: gui
+
+- name: Check if /home/{{ main_user }}/.steam/steam/compatibilitytools.d
+  ansible.builtin.stat:
+    path: /home/{{ main_user }}/.steam/steam/compatibilitytools.d/VERSION
+  register: proton_version_file
+  tags: gui
+
+- name: Set installed_version based on file existence
+  ansible.builtin.set_fact:
+    proton_installed_version: "{{ lookup('file', '/home/{{ main_user }}/.steam/steam/compatibilitytools.d/VERSION') }}"
+  tags: gui
+  when: proton_version_file.stat.exists
+
+- name: Set installed_version to 'not installed' if file does not exist
+  ansible.builtin.set_fact:
+    proton_installed_version: "not installed"
+  tags: gui
+  when: not proton_version_file.stat.exists
+
+- name: Display the proton version
+  ansible.builtin.debug:
+    msg:
+      - "installed: {{ proton_installed_version }}"
+      - "available: {{ proton_latest_version }}"
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags: gui
+
+- name: When there is no VERSION or it's contents don't match, do these
+  ignore_errors: "{{ ansible_check_mode }}"
+  tags: gui
+  when: proton_installed_version != proton_latest_version
+  block:
+    - name: Download proton
+      ansible.builtin.unarchive:
+        src: https://github.com/{{ user }}/{{ repo }}/releases/download/{{ proton_latest_version }}/{{ proton_latest_version }}.tar.gz
+        dest: /home/{{ main_user }}/.steam/steam/compatibilitytools.d
+        remote_src: true
+        mode: '0777'
+        owner: "{{ main_user }}"
+        group: "{{ main_user }}"
+      register: proton_download
+      until: "proton_download is not failed"
+      retries: 3
+      delay: 10
+
+    - name: Add VERSION file
+      ansible.builtin.copy:
+        content: "{{ proton_latest_version }}"
+        dest: /home/{{ main_user }}/.steam/steam/compatibilitytools.d/VERSION
+        mode: '0644'
+        owner: "{{ main_user }}"
+        group: "{{ main_user }}"
+      when: proton_download is not failed
+
+    - name: Remove old version
+      ansible.builtin.file:
+        name: "/home/{{ main_user }}/.steam/steam/compatibilitytools.d/{{proton_installed_version}}"
+        state: absent
+      when:
+        - proton_download is not failed
+        - proton_installed_version != "not installed"
